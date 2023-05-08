@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>InfoVis UE 2023</title>
+
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='styles/style.css')}}">
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+</head>
+<body>
+
+<h1>InfoVis UE 2023 - Exercise 2</h1>
+<p>Enter your name and Matrikelnummer</p>
+
+
+<div id="main_container" class="main_container">
+<div class="container">
+    <label>Indicator:</label>
+<select id="indicator_dropdown" class="dropdown">
+</select>
+    <p id="map_country">&nbsp;</p>
+    <svg id="svg_map"></svg>
+</div>
+<div class="container">
+    <p id="country">&nbsp;</p>
+    <svg id="svg_plot"></svg>
+</div>
+</div>
+
+<div id="svg_line_chart">
+</div>
+
+<script>
+    let data = {{ data | safe }};
+    console.log(data);
+</script>
+
+</body>
+</html>
