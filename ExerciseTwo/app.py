@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 import json
 
+
 app = Flask(__name__)
 
 # ensure that we can reload when we change the HTML / JS for debugging
