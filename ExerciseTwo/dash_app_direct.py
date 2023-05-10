@@ -162,7 +162,7 @@ app.layout = dbc.Container([
 # Add controls to build the interaction
 @callback(
     Output(component_id='map-graph', component_property='figure'),
-    Input(component_id='controls-and-radio-item', component_property='value')
+    Input(component_id='drop-down-country-attribute-item', component_property='value')
 )
 def update_graph(col_chosen):
     fig = px.histogram(df, x='continent', y=col_chosen, histfunc='avg')
@@ -173,10 +173,12 @@ def update_graph(col_chosen):
 # Add controls to build the interaction
 @callback(
     Output(component_id='scatter-graph', component_property='figure'),
-    Input(component_id='controls-and-radio-item', component_property='value')
+    Input(component_id='drop-down-country-attribute-item', component_property='value')
 )
 def update_graph(col_chosen):
-    fig = px.scatter(df, x='continent', y='continent')
+    print(df.columns.values)
+    df_PCA = PrComAnalysis(df, col_chosen)          ####
+    fig = px.scatter(df_PCA, x=df_PCA['PC1'], y=df_PCA['PC2'])      ####
     fig.update_layout(
         margin=dict(l=0, r=0, t=10, b=10),
         xaxis = dict(

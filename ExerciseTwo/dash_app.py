@@ -15,7 +15,6 @@ from sklearn import preprocessing
 def PrComAnalysis(df, string):
     df_2020 = df[df["year"] == 2020].copy()
 
-    # distributing the dataset into two components X and Y
     tmp = list(df_2020.columns)
     tmp.remove(string)
     tmp.remove('Country Name')
