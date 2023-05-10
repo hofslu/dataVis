@@ -8,6 +8,46 @@ import pandas as pd
 
 import os
 
+selection = ['Country Name', 'Country Code', 'year', 'Agricultural land (% of land area)', 'Agricultural land (sq. km)', 'Arable land (% of land area)', 'Arable land (hectares per person)', 'Arable land (hectares)', 'Birth rate, crude (per 1,000 people)', 'Death rate, crude (per 1,000 people)', 'GDP per capita (current US$)', 'Land area (sq. km)', 'Population, total', 'Rural population', 'Rural population (% of total population)', 'Rural population growth (annual %)', 'Surface area (sq. km)']
+
+
+def build_map_from_df(df):
+    fig = 'Choropleth-Map'
+    return fig
+
+def build_tooltip(df, selection):
+    tooltip = {
+        "attributeOne": 1,
+        "attributeTwo": 2,
+        "attributeString": "Information",
+    }
+    return tooltip
+
+def build_PCA(df, attribute):
+    """builds PCA scatter-data-frame for each country, based on attribute-selection
+
+    Args:
+        df (Pandas.DataFrame): the actual data frame
+        attribute (string): the attribute selection string
+
+    Returns:
+        Pandas.DataFrame: head{adCountryCode, PCA1, PCA2}
+    """
+
+def build_time_line(df, selection):
+    """builds dataframe for time-series representation
+
+    Args:
+        df (Pandas.DataFrame): full data-frame
+        selection (string): Country Code
+
+    Returns:
+        Pandas.DataFrame: head(Year, selection)
+    """
+    return 
+
+
+
 # -----------------------------------------------------------------------------------
 from sklearn.decomposition import PCA
 from sklearn import preprocessing
@@ -42,10 +82,7 @@ def PrComAnalysis(df, string):
 
 # load data
 # df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
-# for i in range(0,4):
-#     name = 'new_col_' + str(i)
-#     df[name] = 1
-df = pd.read_csv('./data/claras_dataframe.csv')
+df = pd.read_csv('./data/preproc_claras_dataframe.csv')
 
 
 # Initialize the app - incorporate a Dash Bootstrap theme
@@ -62,13 +99,16 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
                 dbc.Row([
-                    dcc.Dropdown(['pop', 'lifeExp', 'gdpPercap'], 'lifeExp', id='controls-and-radio-item'),
+                    dcc.Dropdown(list(set(df['Country Code'])), 'AUT', id='drop-down-country-code-item'),
+                    dcc.Dropdown(selection, 'Country Code', id='drop-down-country-attribute-item'),
                 ]),
                 dbc.Row([
                     # World-map
                     dcc.Graph(
                         figure={}, id='map-graph',
-                        style={'height': '325px'}
+                        style={
+                            'height': '325px',
+                            }
                     )
                 ]),
         ]),
@@ -77,7 +117,8 @@ app.layout = dbc.Container([
             dcc.Graph(figure={}, id='scatter-graph',
                 style={
                     # "background-color": "#ADD8E6",
-                    'height': '350px'
+                    'height': '350px',
+                    'width': 'auto'
                 }),
                 width=6, 
             ),
@@ -90,7 +131,8 @@ app.layout = dbc.Container([
             # Time-Line
             dcc.Graph(figure={}, id='time-line-graph',
             style={
-                'height': '375px'
+                'height': '375px',
+                'width': 'auto'
             }),
             width=6, style={
                 # "background-color": "#D8BFD8",
@@ -114,16 +156,6 @@ app.layout = dbc.Container([
     # "background-color": "wheat",
     "overflow": "hidden",
     })
-        # html.Div([
-        #     # html.Div(children='My First App with Data, Graph, and Controls'),
-        #     # html.Hr(),
-        #     dcc.Dropdown(['pop', 'lifeExp', 'gdpPercap', 'new_col_2'], 'lifeExp', id='controls-and-radio-item'),
-        #     dash_table.DataTable(data=df.to_dict('records'), page_size=10),
-        #     dcc.Graph(figure={}, id='map-graph'),
-        #     dcc.Graph(figure={}, id='scatter-graph'),
-        #     dcc.Graph(figure={}, id='controls-and-graph')
-        # ])
-
 
 
 
@@ -145,21 +177,45 @@ def update_graph(col_chosen):
 )
 def update_graph(col_chosen):
     fig = px.scatter(df, x='continent', y='continent')
-    fig.update_layout(margin=dict(l=0, r=0, t=10, b=10))
+    fig.update_layout(
+        margin=dict(l=0, r=0, t=10, b=10),
+        xaxis = dict(
+            tickmode = 'linear',
+            tick0 = 0.5,
+            dtick = 0.75
+        ),
+        yaxis = dict(
+            tickmode = 'linear',
+            tick0 = 0.5,
+            dtick = 0.75
+        )
+        )
     return fig
 
 
 # Add controls to build the interaction
 @callback(
     Output(component_id='time-line-graph', component_property='figure'),
-    Input(component_id='controls-and-radio-item', component_property='value')
+    Input(component_id='drop-down-country-code-item', component_property='value'),
+    # Input(component_id='drop-down-country-attribute-item', component_property='value')
 )
+#TODO: how to handle multiple, different imput values: Attribute OR CountryCode
 def update_graph(col_chosen):
-    fig = px.line(df, x=df.index, y=col_chosen) #, title=col_chosen)
-    fig.update_layout(margin=dict(l=0, r=0, t=0, b=0))
+    name = "Agricultural land (% of land area)"
+    indices = df.index[df['Country Code'] == col_chosen].tolist()
+    start = min(indices)
+    end = max(indices)
+    fig = px.line(df, x=df['year'][start:end], y=df[name].iloc[start:end], title=col_chosen)
+    fig.update_layout(margin=dict(l=0, r=0, t=50, b=0))
     return fig
 
 
+
+# ------------------ VIEWs ------------------ 
+#   Map: 
+#   ScatterPlot:
+#   TimeSeries: add Time-Selection
+#   DataFrame: 
 
 
 # Run the app
