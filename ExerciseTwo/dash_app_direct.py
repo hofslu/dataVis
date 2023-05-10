@@ -197,15 +197,14 @@ def update_graph(col_chosen):
 @callback(
     Output(component_id='time-line-graph', component_property='figure'),
     Input(component_id='drop-down-country-code-item', component_property='value'),
-    # Input(component_id='drop-down-country-attribute-item', component_property='value')
+    Input(component_id='drop-down-country-attribute-item', component_property='value')
 )
-#TODO: how to handle multiple, different imput values: Attribute OR CountryCode
-def update_graph(col_chosen):
-    name = "Agricultural land (% of land area)"
-    indices = df.index[df['Country Code'] == col_chosen].tolist()
+
+def update_graph(country_chosen, attr_chosen):
+    indices = df.index[df['Country Code'] == country_chosen].tolist()
     start = min(indices)
     end = max(indices)
-    fig = px.line(df, x=df['year'][start:end], y=df[name].iloc[start:end], title=col_chosen)
+    fig = px.line(df, x=df['year'][start:end], y=df[attr_chosen].iloc[start:end], title=country_chosen + " - " + attr_chosen)
     fig.update_layout(margin=dict(l=0, r=0, t=50, b=0))
     return fig
 
