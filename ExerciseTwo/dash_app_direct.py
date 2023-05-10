@@ -4,11 +4,13 @@ from dash import Dash, html, dash_table, dcc, callback, Output, Input
 import dash_bootstrap_components as dbc
 import plotly.express as px
 
+from utils.PrincipalComponentAnalysis import *
+
 import pandas as pd
 
 import os
 
-selection = ['Country Name', 'Country Code', 'year', 'Agricultural land (% of land area)', 'Agricultural land (sq. km)', 'Arable land (% of land area)', 'Arable land (hectares per person)', 'Arable land (hectares)', 'Birth rate, crude (per 1,000 people)', 'Death rate, crude (per 1,000 people)', 'GDP per capita (current US$)', 'Land area (sq. km)', 'Population, total', 'Rural population', 'Rural population (% of total population)', 'Rural population growth (annual %)', 'Surface area (sq. km)']
+selection = ['Agricultural land (% of land area)', 'Agricultural land (sq. km)', 'Arable land (% of land area)', 'Arable land (hectares per person)', 'Arable land (hectares)', 'Birth rate, crude (per 1,000 people)', 'Death rate, crude (per 1,000 people)', 'GDP per capita (current US$)', 'Land area (sq. km)', 'Population, total', 'Rural population', 'Rural population (% of total population)', 'Rural population growth (annual %)', 'Surface area (sq. km)']
 
 
 def build_map_from_df(df):
@@ -23,16 +25,6 @@ def build_tooltip(df, selection):
     }
     return tooltip
 
-def build_PCA(df, attribute):
-    """builds PCA scatter-data-frame for each country, based on attribute-selection
-
-    Args:
-        df (Pandas.DataFrame): the actual data frame
-        attribute (string): the attribute selection string
-
-    Returns:
-        Pandas.DataFrame: head{adCountryCode, PCA1, PCA2}
-    """
 
 def build_time_line(df, selection):
     """builds dataframe for time-series representation
@@ -49,36 +41,7 @@ def build_time_line(df, selection):
 
 
 # -----------------------------------------------------------------------------------
-from sklearn.decomposition import PCA
-from sklearn import preprocessing
 
-def PrComAnalysis(df, string):
-    df_2020 = df[df["year"] == 2020].copy()
-
-    # distributing the dataset into two components X and Y
-    tmp = list(df_2020.columns)
-    tmp.remove(string)
-    tmp.remove('Country Name')
-    tmp.remove('Country Code')
-    tmp.remove('year') 
-
-    # distributing the dataset into two components X and y
-    # We decided to do the regression on Agricultural land (% of land area)
-    X = df_2020[tmp].values 
-    y =  df_2020.loc[:,[string]].values
-
-    # fitting the Standard scale
-    X_scaled = preprocessing.scale(X)
-
-    # Create a PCA object and fit it to the data
-    pca = PCA(n_components=2)
-    principalComponents = pca.fit_transform(X_scaled)
-
-    df_PCA = pd.DataFrame(data = principalComponents, index = df_2020['Country Code'].values
-                          , columns = ['PC1', 'PC2'])
-    
-    return df_PCA
-# -----------------------------------------------------------------------------------
 
 # load data
 # df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
@@ -176,19 +139,10 @@ def update_graph(col_chosen):
     Input(component_id='controls-and-radio-item', component_property='value')
 )
 def update_graph(col_chosen):
+
     fig = px.scatter(df, x='continent', y='continent')
     fig.update_layout(
         margin=dict(l=0, r=0, t=10, b=10),
-        xaxis = dict(
-            tickmode = 'linear',
-            tick0 = 0.5,
-            dtick = 0.75
-        ),
-        yaxis = dict(
-            tickmode = 'linear',
-            tick0 = 0.5,
-            dtick = 0.75
-        )
         )
     return fig
 
@@ -199,11 +153,11 @@ def update_graph(col_chosen):
     Input(component_id='drop-down-country-code-item', component_property='value'),
     Input(component_id='drop-down-country-attribute-item', component_property='value')
 )
-
 def update_graph(country_chosen, attr_chosen):
     indices = df.index[df['Country Code'] == country_chosen].tolist()
     start = min(indices)
     end = max(indices)
+    # x, y = from_function(df)
     fig = px.line(df, x=df['year'][start:end], y=df[attr_chosen].iloc[start:end], title=country_chosen + " - " + attr_chosen)
     fig.update_layout(margin=dict(l=0, r=0, t=50, b=0))
     return fig
