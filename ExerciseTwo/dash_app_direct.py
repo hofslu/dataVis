@@ -4,13 +4,12 @@ from dash import Dash, html, dash_table, dcc, callback, Output, Input
 import dash_bootstrap_components as dbc
 import plotly.express as px
 
-from utils.PrincipalComponentAnalysis import *
+from utils.PrincipalComponentAnalysis import PrComAnalysis
 
 import pandas as pd
 
 import os
 
-selection = ['Agricultural land (% of land area)', 'Agricultural land (sq. km)', 'Arable land (% of land area)', 'Arable land (hectares per person)', 'Arable land (hectares)', 'Birth rate, crude (per 1,000 people)', 'Death rate, crude (per 1,000 people)', 'GDP per capita (current US$)', 'Land area (sq. km)', 'Population, total', 'Rural population', 'Rural population (% of total population)', 'Rural population growth (annual %)', 'Surface area (sq. km)']
 
 
 def build_map_from_df(df):
@@ -47,6 +46,8 @@ def build_time_line(df, selection):
 # df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
 df = pd.read_csv('./data/preproc_claras_dataframe.csv')
 
+selection = ['Agricultural land (% of land area)', 'Agricultural land (sq. km)', 'Arable land (% of land area)', 'Arable land (hectares per person)', 'Arable land (hectares)', 'Birth rate, crude (per 1,000 people)', 'Death rate, crude (per 1,000 people)', 'GDP per capita (current US$)', 'Land area (sq. km)', 'Population, total', 'Rural population', 'Rural population (% of total population)', 'Rural population growth (annual %)', 'Surface area (sq. km)']
+county_codes = list(set(df['Country Code']))
 
 # Initialize the app - incorporate a Dash Bootstrap theme
 external_stylesheets = [dbc.themes.CERULEAN]
@@ -62,8 +63,8 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
                 dbc.Row([
-                    dcc.Dropdown(list(set(df['Country Code'])), 'AUT', id='drop-down-country-code-item'),
-                    dcc.Dropdown(selection, 'Country Code', id='drop-down-country-attribute-item'),
+                    dcc.Dropdown(county_codes, 'AUT', id='drop-down-country-code-item'),
+                    dcc.Dropdown(selection, selection[0], id='drop-down-country-attribute-item'),
                 ]),
                 dbc.Row([
                     # World-map
@@ -77,7 +78,7 @@ app.layout = dbc.Container([
         ]),
         dbc.Col(
             # Scatter-Plot
-            dcc.Graph(figure={}, id='scatter-graph',
+            dcc.Graph(figure={ }, id='scatter-graph',                     ######### clara aenderung index
                 style={
                     # "background-color": "#ADD8E6",
                     'height': '350px',
@@ -140,10 +141,14 @@ def update_graph(col_chosen):
 )
 def update_graph(col_chosen):
     print(df.columns.values)
-    df_PCA = PrComAnalysis(df, col_chosen)          ####
-    fig = px.scatter(df_PCA, x=df_PCA['PC1'], y=df_PCA['PC2'])      ####
+    df_PCA = PrComAnalysis(df, col_chosen)          ####    clara aenderung
+    fig = px.scatter(df_PCA, x=df_PCA['PC1'], y=df_PCA['PC2'], 
+                     title = "PCA -" + col_chosen,
+                     hover_data={'Country Code':True,
+                                 'PC1':False,
+                                 'PC2': False})      #### clara aenderung
 
-    fig = px.scatter(df, x='continent', y='continent')
+
     fig.update_layout(
         margin=dict(l=0, r=0, t=10, b=10),
         )

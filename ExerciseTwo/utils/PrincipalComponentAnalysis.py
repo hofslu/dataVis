@@ -18,7 +18,6 @@ def build_PCA(df, attribute):
 def PrComAnalysis(df, string):
     df_2020 = df[df["year"] == 2020].copy()
 
-    # distributing the dataset into two components X and Y
     tmp = list(df_2020.columns)
     tmp.remove(string)
     tmp.remove('Country Name')
@@ -37,7 +36,9 @@ def PrComAnalysis(df, string):
     pca = PCA(n_components=2)
     principalComponents = pca.fit_transform(X_scaled)
 
-    df_PCA = pd.DataFrame(data = principalComponents, index = df_2020['Country Code'].values
+    df_PCA = pd.DataFrame(data = principalComponents
                           , columns = ['PC1', 'PC2'])
-    
+    df_PCA = pd.concat([df_PCA, pd.Series(df_2020['Country Code'].values)], axis = 1)
+    df_PCA.columns = ['PC1', 'PC2', 'Country Code']
+
     return df_PCA
