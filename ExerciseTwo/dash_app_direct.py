@@ -1,5 +1,6 @@
 
 from dash import Dash, html, dash_table, dcc, callback, Output, Input
+import plotly.graph_objects as go
 
 import dash_bootstrap_components as dbc
 import plotly.express as px
@@ -53,6 +54,42 @@ county_codes = list(set(df['Country Code']))
 external_stylesheets = [dbc.themes.CERULEAN]
 app = Dash(__name__, external_stylesheets=external_stylesheets)
 
+worldFfig = go.Figure(go.Scattergeo())
+worldFfig.update_geos(projection_type="orthographic")
+worldFfig.update_layout(height=300, margin={"r":0,"t":0,"l":0,"b":0})
+
+
+import plotly.express as px
+import plotly.graph_objs as go
+import pandas as pd
+
+def get_world_plot():
+    rows=[['501-600','15','122.58333','45.36667'],
+        ['till 500','4','12.5','27.5'],
+        ['more 1001','41','-115.53333','38.08'],
+        ]
+    colmns=['bins','data','longitude','latitude']
+    df=pd.DataFrame(data=rows, columns=colmns)
+    df = df.astype({"data": int})
+
+    worldFfig=px.scatter_geo(df,lon='longitude', 
+        lat='latitude',
+        color='bins',
+        opacity=0.5,
+        size='data',
+        projection="orthographic", 
+        hover_data=(['bins'])
+        )
+
+    # worldFfig.add_trace(go.Scattergeo(lon=df["longitude"],
+    #             lat=df["latitude"],
+    #             text=df["data"],
+    #             textposition="middle center",
+    #             mode='text',
+    #             showlegend=False))
+    return worldFfig
+worldFfig = get_world_plot()
+
 
 # App layout
 app.layout = dbc.Container([
@@ -63,15 +100,15 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
                 dbc.Row([
-                    dcc.Dropdown(county_codes, 'AUT', id='drop-down-country-code-item'),
+                    # dcc.Dropdown(county_codes, county_codes[0], id='drop-down-country-code-item'),
                     dcc.Dropdown(selection, selection[0], id='drop-down-country-attribute-item'),
                 ]),
                 dbc.Row([
                     # World-map
                     dcc.Graph(
-                        figure={}, id='map-graph',
+                        figure=worldFfig, id='map-graph',
                         style={
-                            'height': '325px',
+                            'height': '425px',
                             }
                     )
                 ]),
@@ -81,36 +118,32 @@ app.layout = dbc.Container([
             dcc.Graph(figure={ }, id='scatter-graph',                     ######### clara aenderung index
                 style={
                     # "background-color": "#ADD8E6",
-                    'height': '350px',
+                    'height': '400px',
                     'width': 'auto'
                 }),
                 width=6, 
             ),
     ], style={
-        "height": "350px",
+        "height": "400px",
         "overflow": "hidden"
         }),
     dbc.Row([
+        dcc.Dropdown(county_codes, county_codes[0], id='drop-down-country-code-item'),
         dbc.Col(
             # Time-Line
             dcc.Graph(figure={}, id='time-line-graph',
             style={
-                'height': '375px',
+                'height': '350px',
                 'width': 'auto'
             }),
             width=6, style={
                 # "background-color": "#D8BFD8",
                 }
             ),
-        dbc.Col(
-            # detailed-information
-            dash_table.DataTable(data=df.to_dict('records'), 
-            page_size=10
-            ),
-            width=6,
-            ),
     ], style={
+        "display": "inline-block",
         "height": "350px",
+        "width": "200%",
         # "overflow": "hidden"
         })
 
@@ -124,14 +157,16 @@ app.layout = dbc.Container([
 
 
 # Add controls to build the interaction
-@callback(
-    Output(component_id='map-graph', component_property='figure'),
-    Input(component_id='drop-down-country-attribute-item', component_property='value')
-)
-def update_graph(col_chosen):
-    fig = px.histogram(df, x='continent', y=col_chosen, histfunc='avg')
-    fig.update_layout(margin=dict(l=0, r=0, t=5, b=0))
-    return fig
+# @callback(
+#     Output(component_id='map-graph', component_property='figure'),
+#     # Input(component_id='drop-down-country-attribute-item', component_property='value')
+# )
+# def update_graph(col_chosen):
+#     # fig = px.histogram(df, x='continent', y=col_chosen, histfunc='avg')
+#     fig = go.Figure(go.Scattergeo())
+#     fig.update_geos(projection_type="orthographic")
+#     fig.update_layout(height=300, margin={"r":0,"t":0,"l":0,"b":0})
+#     return fig
 
 
 # Add controls to build the interaction
@@ -140,17 +175,14 @@ def update_graph(col_chosen):
     Input(component_id='drop-down-country-attribute-item', component_property='value')
 )
 def update_graph(col_chosen):
-    print(df.columns.values)
     df_PCA = PrComAnalysis(df, col_chosen)          ####    clara aenderung
     fig = px.scatter(df_PCA, x=df_PCA['PC1'], y=df_PCA['PC2'], 
-                     title = "PCA -" + col_chosen,
+                     title = "PrincipalComponantAnalysis - " + col_chosen,
                      hover_data={'Country Code':True,
                                  'PC1':False,
                                  'PC2': False})      #### clara aenderung
-
-
     fig.update_layout(
-        margin=dict(l=0, r=0, t=10, b=10),
+        margin=dict(l=30, r=30, t=60, b=10),
         )
     return fig
 
@@ -169,14 +201,6 @@ def update_graph(country_chosen, attr_chosen):
     fig = px.line(df, x=df['year'][start:end], y=df[attr_chosen].iloc[start:end], title=country_chosen + " - " + attr_chosen)
     fig.update_layout(margin=dict(l=0, r=0, t=50, b=0))
     return fig
-
-
-
-# ------------------ VIEWs ------------------ 
-#   Map: 
-#   ScatterPlot:
-#   TimeSeries: add Time-Selection
-#   DataFrame: 
 
 
 # Run the app
