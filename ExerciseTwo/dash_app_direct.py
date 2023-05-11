@@ -144,14 +144,22 @@ def update_graph(col_chosen):
     df_PCA = PrComAnalysis(df, col_chosen)          ####    clara aenderung
     fig = px.scatter(df_PCA, x=df_PCA['PC1'], y=df_PCA['PC2'], 
                      title = "PCA -" + col_chosen,
-                     hover_data={'Country Code':True,
-                                 'PC1':False,
-                                 'PC2': False})      #### clara aenderung
+                     
+                     hover_name='Country Code',
+                     hover_data = {'PC1': False, 'PC2':False})      #### clara aenderung
 
+    fig.update_traces(marker=dict(size= 15, color='lightpink', opacity=0.6))
 
     fig.update_layout(
         margin=dict(l=0, r=0, t=10, b=10),
-        )
+        hoverlabel=dict(
+        bgcolor="white",
+        font_size=11,
+        font_family="Rockwell"
+        )  
+    )
+    
+    
     return fig
 
 
