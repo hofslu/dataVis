@@ -1,36 +1,7 @@
-from dash import Dash, html, dash_table, dcc, callback, Output, Input
-import dash_bootstrap_components as dbc
+from dash import callback, Output, Input
 import plotly.express as px
 
-import plotly.graph_objs as go
-
-from utils.PrincipalComponentAnalysis import PrComAnalysis
-from utils.WorldMap import build_world_map
-from utils.myApp import build_app_layout
-from utils.CallbackLinks import *
-
-import pandas as pd
-import os
-
-
-# load data
-# df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
-df = pd.read_csv('./data/preproc_claras_dataframe.csv')
-
-# Initialize the app - incorporate a Dash Bootstrap theme
-external_stylesheets = [dbc.themes.CERULEAN]
-app = Dash(__name__, external_stylesheets=external_stylesheets)
-app.layout = build_app_layout(df)
-
-
-
-
-
-# -------------------------------------------------------------------------------------------------------------------------
-# ----------------- Callback Links ----------------------------------------------------------------------------------------
-# -------------------------------------------------------------------------------------------------------------------------
-
-# -------- World Map ----------------------------
+# Add controls to build the interaction
 @callback(
     Output(component_id='map-graph', component_property='figure'),
     Input(component_id='drop-down-world-representation-item', component_property='value')
@@ -39,7 +10,7 @@ def update_map(style):
     return build_world_map(style)
 
 
-# -------- Scatter Plot ----------------------------
+# Add controls to build the interaction
 @callback(
     Output(component_id='scatter-graph', component_property='figure'),
     Input(component_id='drop-down-country-attribute-item', component_property='value')
@@ -62,7 +33,7 @@ def update_scatter(col_chosen):
     return fig
 
 
-# -------- Time Series -----------------------------
+# Add controls to build the interaction
 @callback(
     Output(component_id='time-line-graph', component_property='figure'),
     Input(component_id='scatter-graph', component_property='clickData'),
@@ -85,18 +56,9 @@ def update_time_line(country_chosen, attr_chosen):
     return fig
 
 
-
-# -------- Header ----------------------------------
 @callback(
     Output(component_id='debug-line', component_property='children'),
     Input(component_id='scatter-graph', component_property='clickData')
 )
 def update_debug_line(data):
     print(data)
-
-
-
-
-# Run the app
-if __name__ == '__main__':
-    app.run_server(debug=True)
