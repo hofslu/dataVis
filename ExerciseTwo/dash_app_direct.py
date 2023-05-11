@@ -49,12 +49,8 @@ def update_map(style, hover_scatter, hover_map):
     Input(component_id='map-graph', component_property='hoverData')]
 )
 def update_scatter(col_chosen, hover_scatter, hover_map):
-    print(hover_map)
-    print(hover_scatter)
     time.sleep(0.01)
     country = None
-    print(hover_scatter)
-    print(hover_map)
     if hover_scatter:
         country = hover_scatter['points'][0]['hovertext']
     elif hover_map:
@@ -103,7 +99,6 @@ def update_time_line(country_chosen, attr_chosen):
         end = max(indices)
         
         line_df = df.iloc[start:end]
-        print(df.columns.values)
         fig = px.line(line_df, 
             x=line_df['year'], 
             y=line_df[attr_chosen],
