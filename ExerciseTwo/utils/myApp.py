@@ -2,9 +2,7 @@ from dash import Dash, html, dash_table, dcc, callback, Output, Input
 import dash_bootstrap_components as dbc
 import plotly.express as px
 
-from utils.WorldMap import build_world_map, dev_build_world_map, build_world_map_tutorial
-build_world_map = dev_build_world_map
-# build_world_map = build_world_map_tutorial
+from utils.WorldMap import build_world_map
 from urllib.request import urlopen
 import json
 
@@ -17,14 +15,9 @@ def build_app_layout(df):
     world_views = ['orthographic', 'natural earth']
 
     # get geo-json data 
-    # url = 'https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json'
     url = 'https://gist.githubusercontent.com/bquast/944781aa6dcc257ebf9aeee3c098b637/raw/871039f36e7b277a20d34619d72ec6b62957fe28/world-topo.json'
     with urlopen(url) as response:
         counties = json.load(response)
-
-    # import pandas as pd
-    # df = pd.read_csv("https://raw.githubusercontent.com/plotly/datasets/master/fips-unemp-16.csv",
-    #                 dtype={"fips": str})
     
     # WorldFigure
     worldFfig = build_world_map(None, None)
@@ -38,7 +31,6 @@ def build_app_layout(df):
         dbc.Row([
             dbc.Col([
                     dbc.Row([
-                        # dcc.Dropdown(county_codes, county_codes[0], id='drop-down-country-code-item'),
                         dcc.Dropdown(selection, selection[0], id='drop-down-country-attribute-item'),
                         dcc.RadioItems(world_views, world_views[0], id='drop-down-world-representation-item', style={'accent-color': 'pink'}),
                     ]),
@@ -56,9 +48,7 @@ def build_app_layout(df):
                 # Scatter-Plot
                 dcc.Graph(figure={ }, id='scatter-graph',                     ######### clara aenderung index
                     style={
-                        # "background-color": "#ADD8E6",
                         'height': '400px',
-                        # 'width': 'auto'
                     }),
                     width=6, 
                 ),
@@ -67,7 +57,6 @@ def build_app_layout(df):
             "overflow": "hidden",
             }),
         dbc.Row([
-            # dcc.Dropdown(county_codes, county_codes[0], id='drop-down-country-code-item'),
             dbc.Col(
                 # Time-Line
                 dcc.Graph(figure={}, id='time-line-graph',
@@ -75,21 +64,17 @@ def build_app_layout(df):
                     'height': '350px',
                     'width': '100%'
                 }),
-                width=6, style={
-                    # "background-color": "#D8BFD8",
-                    }
+                width=6
                 ),
         ], style={
             "display": "inline-block",
             "height": "350px",
             "width": "220%",
-            # "overflow": "hidden"
             })
 
     ],style={
         "height": "100vh", 
         "width": "100vw", 
-        # "background-color": "wheat",
         "overflow": "hidden",
         'boxsizing': 'border-box',
         'margin': '10px'

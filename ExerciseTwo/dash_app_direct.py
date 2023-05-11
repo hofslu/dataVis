@@ -6,18 +6,14 @@ import time
 import plotly.graph_objs as go
 
 from utils.PrincipalComponentAnalysis import PrComAnalysis
-from utils.WorldMap import build_world_map, dev_build_world_map, build_world_map_tutorial
-build_world_map = dev_build_world_map
-# build_world_map = build_world_map_tutorial
+from utils.WorldMap import build_world_map
 from utils.myApp import build_app_layout
-# from utils.CallbackLinks import *
 
 import pandas as pd
 import os
 
 
 # load data
-# df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
 df = pd.read_csv('./data/preproc_claras_dataframe.csv')
 df = df.drop(0)
 
@@ -25,8 +21,6 @@ df = df.drop(0)
 external_stylesheets = [dbc.themes.CERULEAN]
 app = Dash(__name__, external_stylesheets=external_stylesheets)
 app.layout = build_app_layout(df)
-
-
 
 
 
@@ -80,12 +74,6 @@ def update_scatter(col_chosen, hover_scatter, hover_map):
                      color_discrete_sequence = ['pink', 'deeppink'])    #### clara aenderung
 
     fig.update_traces(marker=dict(size= 15, opacity=0.6))
-    #fig.update_layout()
-    #fig.update_traces(marker_showscale=False)
-    #fig.update_traces(marker_coloraxis=None)
-    #fig.update_layout(coloraxis_showscale=False)
-    #fig.update_coloraxes(showscale=False)
-    #fig.update(layout_coloraxis_showscale=False)
 
     fig.update_layout(
         margin=dict(l=0, r=0, t=30, b=10),
@@ -102,11 +90,8 @@ def update_scatter(col_chosen, hover_scatter, hover_map):
     Output(component_id='time-line-graph', component_property='figure'),
     [Input(component_id='map-graph', component_property='clickData'),
     Input(component_id='drop-down-country-attribute-item', component_property='value')]
-    # Input(component_id='scatter-graph', component_property='clickData'),
-    # Input(component_id='drop-down-country-code-item', component_property='value'),
 )
 def update_time_line(country_chosen, attr_chosen):
-    # country_chosen = country_chosen['points'][0]['hovertext'] # scatter plot change
     if country_chosen is None: 
         fig = px.line(x=[0,1], y=[1,1])
         fig.update_traces(line_color='pink')           #### clara aenderung
@@ -126,7 +111,6 @@ def update_time_line(country_chosen, attr_chosen):
             labels={
                 'x': "Year",
                 'y': attr_chosen},
-            # hover_name=attr_chosen,
             hover_data={'year':False}
             )         #### clara aenderung
         fig.update_traces(line_color='deeppink')           #### clara aenderung
@@ -136,15 +120,6 @@ def update_time_line(country_chosen, attr_chosen):
     return fig
 
 
-
-# # -------- Header ----------------------------------
-# @callback(
-#     Output(component_id='debug-line', component_property='children'),
-#     Input(component_id='scatter-graph', component_property='clickData')
-# )
-# def update_debug_line(data):
-#     print(data)
-
 # reset hoverData for scatter
 @callback(
     Output(component_id='scatter-graph', component_property='hoverData'),
@@ -152,8 +127,6 @@ def update_time_line(country_chosen, attr_chosen):
 )
 def reset_hover_scatter(hover_map):
     return None
-
-
 
 
 # Run the app

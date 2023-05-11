@@ -3,17 +3,6 @@ from sklearn import preprocessing
 
 import pandas as pd
 
-def build_PCA(df, attribute):
-    """builds PCA scatter-data-frame for each country, based on attribute-selection
-
-    Args:
-        df (Pandas.DataFrame): the actual data frame
-        attribute (string): the attribute selection string
-
-    Returns:
-        Pandas.DataFrame: head{adCountryCode, PCA1, PCA2}
-    """
-
 
 def PrComAnalysis(df, string):
     df_2020 = df[df["year"] == 2020].copy()
