@@ -7,16 +7,21 @@ import pandas as pd
 
 import json
 
-def dev_build_world_map(df, counties):
+def dev_build_world_map():
     url = 'https://gist.githubusercontent.com/bquast/944781aa6dcc257ebf9aeee3c098b637/raw/871039f36e7b277a20d34619d72ec6b62957fe28/world-topo.json'
     with urlopen(url) as response:
         counties = json.load(response)
 
+    data = pd.read_csv('./data/preproc_claras_dataframe.csv')
+
+    countries = list(data['Country Code'].unique())
+    colors = [1 for c in countries]
+
     fig = px.choropleth(
         geojson=counties,
-        locations=['AUT', 'USA', 'DEU'], 
+        locations=countries, 
         locationmode="ISO-3", 
-        color=[1, 1, 1],
+        color=colors,
         projection='orthographic'
         )
     

@@ -2,8 +2,9 @@ from dash import Dash, html, dash_table, dcc, callback, Output, Input
 import dash_bootstrap_components as dbc
 import plotly.express as px
 
-from utils.WorldMap import build_world_map, dev_build_world_map
+from utils.WorldMap import build_world_map, dev_build_world_map, build_world_map_tutorial
 build_world_map = dev_build_world_map
+# build_world_map = build_world_map_tutorial
 from urllib.request import urlopen
 import json
 
@@ -26,13 +27,13 @@ def build_app_layout(df):
     #                 dtype={"fips": str})
     
     # WorldFigure
-    worldFfig = build_world_map(df, counties)
+    worldFfig = build_world_map()
 
     # App layout
     layout = dbc.Container([
-        dbc.Row([
-            html.H1("This is our first python dash(board) app :)", id='debug-line')
-        ]),
+        # dbc.Row([
+        #     html.H1("This is our first python dash(board) app :)", id='debug-line')
+        # ]),
 
         dbc.Row([
             dbc.Col([
@@ -66,7 +67,7 @@ def build_app_layout(df):
             "overflow": "hidden"
             }),
         dbc.Row([
-            dcc.Dropdown(county_codes, county_codes[0], id='drop-down-country-code-item'),
+            # dcc.Dropdown(county_codes, county_codes[0], id='drop-down-country-code-item'),
             dbc.Col(
                 # Time-Line
                 dcc.Graph(figure={}, id='time-line-graph',
