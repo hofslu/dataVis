@@ -49,21 +49,21 @@ df = pd.read_csv('./data/preproc_claras_dataframe.csv')
 
 selection = ['Agricultural land (% of land area)', 'Agricultural land (sq. km)', 'Arable land (% of land area)', 'Arable land (hectares per person)', 'Arable land (hectares)', 'Birth rate, crude (per 1,000 people)', 'Death rate, crude (per 1,000 people)', 'GDP per capita (current US$)', 'Land area (sq. km)', 'Population, total', 'Rural population', 'Rural population (% of total population)', 'Rural population growth (annual %)', 'Surface area (sq. km)']
 county_codes = list(set(df['Country Code']))
+world_views = ['orthographic', 'natural earth']
+
 
 # Initialize the app - incorporate a Dash Bootstrap theme
 external_stylesheets = [dbc.themes.CERULEAN]
 app = Dash(__name__, external_stylesheets=external_stylesheets)
-
-worldFfig = go.Figure(go.Scattergeo())
-worldFfig.update_geos(projection_type="orthographic")
-worldFfig.update_layout(height=300, margin={"r":0,"t":0,"l":0,"b":0})
 
 
 import plotly.express as px
 import plotly.graph_objs as go
 import pandas as pd
 
-def get_world_plot():
+
+# drop-down-world-representation-item
+def get_world_plot(style='orthographic'):
     rows=[['501-600','15','122.58333','45.36667'],
         ['till 500','4','12.5','27.5'],
         ['more 1001','41','-115.53333','38.08'],
@@ -87,7 +87,13 @@ def get_world_plot():
     #             textposition="middle center",
     #             mode='text',
     #             showlegend=False))
+
+    worldFfig = go.Figure(go.Scattergeo())
+    worldFfig.update_geos(projection_type=style)
+    worldFfig.update_layout(height=300, margin={"r":0,"t":0,"l":0,"b":0})
+
     return worldFfig
+
 worldFfig = get_world_plot()
 
 
@@ -102,6 +108,7 @@ app.layout = dbc.Container([
                 dbc.Row([
                     # dcc.Dropdown(county_codes, county_codes[0], id='drop-down-country-code-item'),
                     dcc.Dropdown(selection, selection[0], id='drop-down-country-attribute-item'),
+                    dcc.RadioItems(world_views, world_views[0], id='drop-down-world-representation-item'),
                 ]),
                 dbc.Row([
                     # World-map
@@ -167,6 +174,15 @@ app.layout = dbc.Container([
 #     fig.update_geos(projection_type="orthographic")
 #     fig.update_layout(height=300, margin={"r":0,"t":0,"l":0,"b":0})
 #     return fig
+
+
+# Add controls to build the interaction
+@callback(
+    Output(component_id='map-graph', component_property='figure'),
+    Input(component_id='drop-down-world-representation-item', component_property='value')
+)
+def update_map(style):
+    return get_world_plot(style)
 
 
 # Add controls to build the interaction
