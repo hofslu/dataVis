@@ -94,10 +94,12 @@ def update_graph(col_chosen):
 # Add controls to build the interaction
 @callback(
     Output(component_id='time-line-graph', component_property='figure'),
-    Input(component_id='drop-down-country-code-item', component_property='value'),
+    Input(component_id='scatter-graph', component_property='clickData'),
+    # Input(component_id='drop-down-country-code-item', component_property='value'),
     Input(component_id='drop-down-country-attribute-item', component_property='value')
 )
-def update_graph(country_chosen, attr_chosen):
+def update_time_line(country_chosen, attr_chosen):
+    country_chosen = country_chosen['points'][0]['hovertext']
     indices = df.index[df['Country Code'] == country_chosen].tolist()
     start = min(indices)
     end = max(indices)
@@ -110,6 +112,13 @@ def update_graph(country_chosen, attr_chosen):
     fig.update_layout(margin=dict(l=0, r=0, t=50, b=0))
     fig.update_traces(line_color='lightpink')           #### clara aenderung
     return fig
+
+@callback(
+    Output(component_id='debug-line', component_property='children'),
+    Input(component_id='scatter-graph', component_property='clickData')
+)
+def update_debug_line(data):
+    print(data)
 
 
 # Run the app

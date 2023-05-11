@@ -4,6 +4,10 @@ import plotly.express as px
 
 from utils.WorldMap import build_world_map
 
+from urllib.request import urlopen
+import json
+
+
 def build_app_layout(df):
 
     # parameters
@@ -11,14 +15,24 @@ def build_app_layout(df):
     county_codes = list(set(df['Country Code']))
     world_views = ['orthographic', 'natural earth']
 
+    # get geo-json data 
+    # url = 'https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json'
+    url = 'https://gist.githubusercontent.com/bquast/944781aa6dcc257ebf9aeee3c098b637/raw/871039f36e7b277a20d34619d72ec6b62957fe28/world-topo.json'
+    with urlopen(url) as response:
+        counties = json.load(response)
+
+    # import pandas as pd
+    # df = pd.read_csv("https://raw.githubusercontent.com/plotly/datasets/master/fips-unemp-16.csv",
+    #                 dtype={"fips": str})
+    
     # WorldFigure
-    worldFfig = build_world_map(df)
+    worldFfig = build_world_map(df, counties)
 
     # App layout
     layout = dbc.Container([
-        # dbc.Row([
-        #     html.H1("This is our first python dash(board) app :)")
-        # ]),
+        dbc.Row([
+            html.H1("This is our first python dash(board) app :)", id='debug-line')
+        ]),
 
         dbc.Row([
             dbc.Col([

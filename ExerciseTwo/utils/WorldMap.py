@@ -5,22 +5,13 @@ import pandas as pd
 
 
 
-def build_world_map(df, style='orthographic'):
-    from urllib.request import urlopen
-    import json
-    url = 'https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json'
-    # url = 'https://gist.githubusercontent.com/bquast/944781aa6dcc257ebf9aeee3c098b637/raw/871039f36e7b277a20d34619d72ec6b62957fe28/world-topo.json'
-    with urlopen(url) as response:
-        counties = json.load(response)
-        print(json.dumps(counties, indent=2))
 
-    # import pandas as pd
-    # df = pd.read_csv("https://raw.githubusercontent.com/plotly/datasets/master/fips-unemp-16.csv",
-    #                 dtype={"fips": str})
+def build_world_map(df, geojson, style='orthographic'):
+
 
     import plotly.express as px
 
-    fig = px.choropleth(df, geojson=counties,
+    fig = px.choropleth(df, geojson=geojson,
         color_continuous_scale="Viridis",
         range_color=(0, 12),
         scope="usa",
