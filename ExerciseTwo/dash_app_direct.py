@@ -93,6 +93,7 @@ def update_scatter(col_chosen, hover_scatter, hover_map):
         font_size=13
         )  
     )
+    fig.update_layout(showlegend=False)
     return fig
 
 

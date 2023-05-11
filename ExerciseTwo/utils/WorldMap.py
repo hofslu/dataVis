@@ -37,7 +37,7 @@ def dev_build_world_map(hover_scatter, hover_map, style='orthographic'):
         color='color',
         projection=style
         )
-    
+    fig.update_layout(showlegend=False)    
     return fig
 
 def build_world_map(df, geojson, style='orthographic'):

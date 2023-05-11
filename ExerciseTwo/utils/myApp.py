@@ -31,9 +31,9 @@ def build_app_layout(df):
 
     # App layout
     layout = dbc.Container([
-        # dbc.Row([
-        #     html.H1("This is our first python dash(board) app :)", id='debug-line')
-        # ]),
+        dbc.Row([
+            html.H3("This is our first python dash(board) app :)", id='debug-line')
+        ]),
 
         dbc.Row([
             dbc.Col([
@@ -58,7 +58,7 @@ def build_app_layout(df):
                     style={
                         # "background-color": "#ADD8E6",
                         'height': '400px',
-                        'width': 'auto'
+                        # 'width': 'auto'
                     }),
                     width=6, 
                 ),
@@ -73,7 +73,7 @@ def build_app_layout(df):
                 dcc.Graph(figure={}, id='time-line-graph',
                 style={
                     'height': '350px',
-                    'width': 'auto'
+                    'width': '100%'
                 }),
                 width=6, style={
                     # "background-color": "#D8BFD8",
@@ -82,7 +82,7 @@ def build_app_layout(df):
         ], style={
             "display": "inline-block",
             "height": "350px",
-            "width": "200%",
+            "width": "220%",
             # "overflow": "hidden"
             })
 
