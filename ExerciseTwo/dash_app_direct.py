@@ -39,7 +39,7 @@ app.layout = build_app_layout(df)
     Input(component_id='drop-down-world-representation-item', component_property='value')
 )
 def update_map(style):
-    return build_world_map()
+    return build_world_map(style)
 
 
 # -------- Scatter Plot ----------------------------
@@ -74,9 +74,9 @@ def update_scatter(col_chosen):
     # Input(component_id='drop-down-country-code-item', component_property='value'),
 )
 def update_time_line(country_chosen, attr_chosen):
-    print(country_chosen['points'][0]['location'])
-    # country_chosen = country_chosen['points'][0]['hovertext']
-    country_chosen = country_chosen['points'][0]['location']
+    # country_chosen = country_chosen['points'][0]['hovertext'] # scatter plot change
+    country_chosen = country_chosen['points'][0]['location'] # world map change
+
     indices = df.index[df['Country Code'] == country_chosen].tolist()
     start = min(indices)
     end = max(indices)
