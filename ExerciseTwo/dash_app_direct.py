@@ -36,25 +36,48 @@ app.layout = build_app_layout(df)
 # -------- World Map ----------------------------
 @callback(
     Output(component_id='map-graph', component_property='figure'),
-    Input(component_id='drop-down-world-representation-item', component_property='value')
+    [Input(component_id='drop-down-world-representation-item', component_property='value'),
+    Input(component_id='scatter-graph', component_property='hoverData'),
+    Input(component_id='map-graph', component_property='hoverData')]
 )
-def update_map(style):
-    return build_world_map(style)
+def update_map(style, hover_scatter, hover_map):
+    return build_world_map(hover_scatter, hover_map, style)
 
 
 # -------- Scatter Plot ----------------------------
 @callback(
     Output(component_id='scatter-graph', component_property='figure'),
-    Input(component_id='drop-down-country-attribute-item', component_property='value')
+    [Input(component_id='drop-down-country-attribute-item', component_property='value'),
+    Input(component_id='scatter-graph', component_property='hoverData'),
+    Input(component_id='map-graph', component_property='hoverData')]
 )
-def update_scatter(col_chosen):
+def update_scatter(col_chosen, hover_scatter, hover_map):
+    country = None
+    if hover_scatter:
+        country = hover_scatter['points'][0]['hovertext']
+    elif hover_map:
+        country = hover_map['points'][0]['location']
+    else:
+        pass
     df_PCA = PrComAnalysis(df, col_chosen)          ####    clara aenderung
+    df_PCA = pd.concat([df_PCA, df_PCA['Country Code'] == country], axis = 1)
+    df_PCA.columns = ['PC1', 'PC2', 'Country Code', 'chosen']
+    df_PCA = df_PCA.sort_values(by = 'chosen')
+
     fig = px.scatter(df_PCA, x=df_PCA['PC1'], y=df_PCA['PC2'], 
                      title = "PCA -" + col_chosen,
                      hover_name='Country Code',
-                     hover_data = {'PC1': False, 'PC2':False})      #### clara aenderung
+                     hover_data = {'PC1': False, 'PC2':False, 'chosen':False},
+                     color = 'chosen',
+                     color_discrete_sequence = ['blue', 'red'])    #### clara aenderung
 
-    fig.update_traces(marker=dict(size= 15, color='lightpink', opacity=0.6))
+    fig.update_traces(marker=dict(size= 15, opacity=0.6))
+    #fig.update_layout()
+    #fig.update_traces(marker_showscale=False)
+    #fig.update_traces(marker_coloraxis=None)
+    #fig.update_layout(coloraxis_showscale=False)
+    #fig.update_coloraxes(showscale=False)
+    #fig.update(layout_coloraxis_showscale=False)
 
     fig.update_layout(
         margin=dict(l=0, r=0, t=30, b=10),
@@ -75,7 +98,9 @@ def update_scatter(col_chosen):
 )
 def update_time_line(country_chosen, attr_chosen):
     # country_chosen = country_chosen['points'][0]['hovertext'] # scatter plot change
+    if country_chosen is None: return
     country_chosen = country_chosen['points'][0]['location'] # world map change
+
 
     indices = df.index[df['Country Code'] == country_chosen].tolist()
     start = min(indices)

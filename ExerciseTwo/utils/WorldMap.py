@@ -7,15 +7,24 @@ import pandas as pd
 
 import json
 
-def dev_build_world_map(style='orthographic'):
+def dev_build_world_map(hover_scatter, hover_map, style='orthographic'):
     url = 'https://gist.githubusercontent.com/bquast/944781aa6dcc257ebf9aeee3c098b637/raw/871039f36e7b277a20d34619d72ec6b62957fe28/world-topo.json'
     with urlopen(url) as response:
         counties = json.load(response)
 
     data = pd.read_csv('./data/preproc_claras_dataframe.csv')
 
+    country = None
+    if hover_scatter:
+        country = hover_scatter['points'][0]['hovertext']
+    elif hover_map:
+        country = hover_map['points'][0]['location']
+    else:
+        pass
+
+    
     countries = list(data['Country Code'].unique())
-    colors = [1 for c in countries]
+    colors = ['red' if c == country else 'blue' for c in countries]
 
     fig = px.choropleth(
         geojson=counties,

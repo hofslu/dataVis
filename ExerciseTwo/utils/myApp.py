@@ -27,7 +27,7 @@ def build_app_layout(df):
     #                 dtype={"fips": str})
     
     # WorldFigure
-    worldFfig = build_world_map()
+    worldFfig = build_world_map(None, None)
 
     # App layout
     layout = dbc.Container([
