@@ -1,14 +1,13 @@
-
 from dash import Dash, html, dash_table, dcc, callback, Output, Input
-import plotly.graph_objects as go
-
 import dash_bootstrap_components as dbc
 import plotly.express as px
 
+
 from utils.PrincipalComponentAnalysis import PrComAnalysis
+from utils.WorldMap import build_world_map
+from utils.myApp import build_app_layout
 
 import pandas as pd
-
 import os
 
 
@@ -47,133 +46,15 @@ def build_time_line(df, selection):
 # df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
 df = pd.read_csv('./data/preproc_claras_dataframe.csv')
 
-selection = ['Agricultural land (% of land area)', 'Agricultural land (sq. km)', 'Arable land (% of land area)', 'Arable land (hectares per person)', 'Arable land (hectares)', 'Birth rate, crude (per 1,000 people)', 'Death rate, crude (per 1,000 people)', 'GDP per capita (current US$)', 'Land area (sq. km)', 'Population, total', 'Rural population', 'Rural population (% of total population)', 'Rural population growth (annual %)', 'Surface area (sq. km)']
-county_codes = list(set(df['Country Code']))
-world_views = ['orthographic', 'natural earth']
-
-
 # Initialize the app - incorporate a Dash Bootstrap theme
 external_stylesheets = [dbc.themes.CERULEAN]
 app = Dash(__name__, external_stylesheets=external_stylesheets)
-
+app.layout = build_app_layout(df)
 
 import plotly.express as px
 import plotly.graph_objs as go
 import pandas as pd
 
-
-# drop-down-world-representation-item
-def get_world_plot(style='orthographic'):
-    rows=[['501-600','15','122.58333','45.36667'],
-        ['till 500','4','12.5','27.5'],
-        ['more 1001','41','-115.53333','38.08'],
-        ]
-    colmns=['bins','data','longitude','latitude']
-    df=pd.DataFrame(data=rows, columns=colmns)
-    df = df.astype({"data": int})
-
-    worldFfig=px.scatter_geo(df,lon='longitude', 
-        lat='latitude',
-        color='bins',
-        opacity=0.5,
-        size='data',
-        projection="orthographic", 
-        hover_data=(['bins'])
-        )
-
-    # worldFfig.add_trace(go.Scattergeo(lon=df["longitude"],
-    #             lat=df["latitude"],
-    #             text=df["data"],
-    #             textposition="middle center",
-    #             mode='text',
-    #             showlegend=False))
-
-    worldFfig = go.Figure(go.Scattergeo())
-    worldFfig.update_geos(projection_type=style)
-    worldFfig.update_layout(height=300, margin={"r":0,"t":0,"l":0,"b":0})
-
-    return worldFfig
-
-worldFfig = get_world_plot()
-
-
-# App layout
-app.layout = dbc.Container([
-    # dbc.Row([
-    #     html.H1("This is our first python dash(board) app :)")
-    # ]),
-
-    dbc.Row([
-        dbc.Col([
-                dbc.Row([
-                    # dcc.Dropdown(county_codes, county_codes[0], id='drop-down-country-code-item'),
-                    dcc.Dropdown(selection, selection[0], id='drop-down-country-attribute-item'),
-                    dcc.RadioItems(world_views, world_views[0], id='drop-down-world-representation-item'),
-                ]),
-                dbc.Row([
-                    # World-map
-                    dcc.Graph(
-                        figure=worldFfig, id='map-graph',
-                        style={
-                            'height': '425px',
-                            }
-                    )
-                ]),
-        ]),
-        dbc.Col(
-            # Scatter-Plot
-            dcc.Graph(figure={ }, id='scatter-graph',                     ######### clara aenderung index
-                style={
-                    # "background-color": "#ADD8E6",
-                    'height': '400px',
-                    'width': 'auto'
-                }),
-                width=6, 
-            ),
-    ], style={
-        "height": "400px",
-        "overflow": "hidden"
-        }),
-    dbc.Row([
-        dcc.Dropdown(county_codes, county_codes[0], id='drop-down-country-code-item'),
-        dbc.Col(
-            # Time-Line
-            dcc.Graph(figure={}, id='time-line-graph',
-            style={
-                'height': '350px',
-                'width': 'auto'
-            }),
-            width=6, style={
-                # "background-color": "#D8BFD8",
-                }
-            ),
-    ], style={
-        "display": "inline-block",
-        "height": "350px",
-        "width": "200%",
-        # "overflow": "hidden"
-        })
-
-],style={
-    "height": "100vh", 
-    "width": "100vw", 
-    # "background-color": "wheat",
-    "overflow": "hidden",
-    })
-
-
-
-# Add controls to build the interaction
-# @callback(
-#     Output(component_id='map-graph', component_property='figure'),
-#     # Input(component_id='drop-down-country-attribute-item', component_property='value')
-# )
-# def update_graph(col_chosen):
-#     # fig = px.histogram(df, x='continent', y=col_chosen, histfunc='avg')
-#     fig = go.Figure(go.Scattergeo())
-#     fig.update_geos(projection_type="orthographic")
-#     fig.update_layout(height=300, margin={"r":0,"t":0,"l":0,"b":0})
-#     return fig
 
 
 # Add controls to build the interaction
@@ -182,7 +63,7 @@ app.layout = dbc.Container([
     Input(component_id='drop-down-world-representation-item', component_property='value')
 )
 def update_map(style):
-    return get_world_plot(style)
+    return build_world_map(style)
 
 
 # Add controls to build the interaction
