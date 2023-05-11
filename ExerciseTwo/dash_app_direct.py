@@ -59,6 +59,8 @@ def update_scatter(col_chosen, hover_scatter, hover_map):
     print(hover_scatter)
     time.sleep(0.01)
     country = None
+    print(hover_scatter)
+    print(hover_map)
     if hover_scatter:
         country = hover_scatter['points'][0]['hovertext']
     elif hover_map:
@@ -104,7 +106,7 @@ def update_scatter(col_chosen, hover_scatter, hover_map):
 )
 def update_time_line(country_chosen, attr_chosen):
     # country_chosen = country_chosen['points'][0]['hovertext'] # scatter plot change
-    if country_chosen is None: return
+    if country_chosen is None: return px.line(x=[0,1], y=[1,1])
     country_chosen = country_chosen['points'][0]['location'] # world map change
 
 
