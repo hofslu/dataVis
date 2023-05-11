@@ -35,9 +35,19 @@ def dev_build_world_map(hover_scatter, hover_map, style='orthographic'):
         locations='countries', 
         locationmode="ISO-3", 
         color='color',
-        projection=style
+        projection=style,
+        color_discrete_sequence = ['pink', 'deeppink'],
+
+        hover_name ='countries',
+        hover_data={'countries': False, 'color':False}
         )
-    fig.update_layout(showlegend=False)    
+    fig.update_layout(
+        showlegend=False,
+        hoverlabel={
+            'font_size': 13,
+            'bgcolor': 'deeppink'
+        }
+        )    
     return fig
 
 def build_world_map(df, geojson, style='orthographic'):

@@ -32,7 +32,7 @@ def build_app_layout(df):
     # App layout
     layout = dbc.Container([
         dbc.Row([
-            html.H3("This is our first python dash(board) app :)", id='debug-line')
+            html.H3("This is our first python dash(board) app :)", id='debug-line', style={'color': 'deeppink'})
         ]),
 
         dbc.Row([
@@ -40,7 +40,7 @@ def build_app_layout(df):
                     dbc.Row([
                         # dcc.Dropdown(county_codes, county_codes[0], id='drop-down-country-code-item'),
                         dcc.Dropdown(selection, selection[0], id='drop-down-country-attribute-item'),
-                        dcc.RadioItems(world_views, world_views[0], id='drop-down-world-representation-item'),
+                        dcc.RadioItems(world_views, world_views[0], id='drop-down-world-representation-item', style={'accent-color': 'pink'}),
                     ]),
                     dbc.Row([
                         # World-map
@@ -64,7 +64,7 @@ def build_app_layout(df):
                 ),
         ], style={
             "height": "400px",
-            "overflow": "hidden"
+            "overflow": "hidden",
             }),
         dbc.Row([
             # dcc.Dropdown(county_codes, county_codes[0], id='drop-down-country-code-item'),
@@ -91,5 +91,7 @@ def build_app_layout(df):
         "width": "100vw", 
         # "background-color": "wheat",
         "overflow": "hidden",
+        'boxsizing': 'border-box',
+        'margin': '10px'
         })
     return layout

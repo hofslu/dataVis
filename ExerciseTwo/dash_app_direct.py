@@ -73,11 +73,11 @@ def update_scatter(col_chosen, hover_scatter, hover_map):
     df_PCA = df_PCA.sort_values(by = 'chosen')
 
     fig = px.scatter(df_PCA, x=df_PCA['PC1'], y=df_PCA['PC2'], 
-                     title = "PCA -" + col_chosen,
+                     title = "PrincipalCompnentAnalysis - " + col_chosen,
                      hover_name='Country Code',
                      hover_data = {'PC1': False, 'PC2':False, 'chosen':False},
                      color = 'chosen',
-                     color_discrete_sequence = ['blue', 'red'])    #### clara aenderung
+                     color_discrete_sequence = ['pink', 'deeppink'])    #### clara aenderung
 
     fig.update_traces(marker=dict(size= 15, opacity=0.6))
     #fig.update_layout()
@@ -107,21 +107,32 @@ def update_scatter(col_chosen, hover_scatter, hover_map):
 )
 def update_time_line(country_chosen, attr_chosen):
     # country_chosen = country_chosen['points'][0]['hovertext'] # scatter plot change
-    if country_chosen is None: return px.line(x=[0,1], y=[1,1])
-    country_chosen = country_chosen['points'][0]['location'] # world map change
+    if country_chosen is None: 
+        fig = px.line(x=[0,1], y=[1,1])
+        fig.update_traces(line_color='pink')           #### clara aenderung
+    else: 
+        country_chosen = country_chosen['points'][0]['location'] # world map change
+
+        indices = df.index[df['Country Code'] == country_chosen].tolist()
+        start = min(indices)
+        end = max(indices)
+        
+        line_df = df.iloc[start:end]
+        print(df.columns.values)
+        fig = px.line(line_df, 
+            x=line_df['year'], 
+            y=line_df[attr_chosen],
+            title=country_chosen + " - " + attr_chosen, 
+            labels={
+                'x': "Year",
+                'y': attr_chosen},
+            # hover_name=attr_chosen,
+            hover_data={'year':False}
+            )         #### clara aenderung
+        fig.update_traces(line_color='deeppink')           #### clara aenderung
 
 
-    indices = df.index[df['Country Code'] == country_chosen].tolist()
-    start = min(indices)
-    end = max(indices)
-    # x, y = from_function(df)
-    fig = px.line(df, x=df['year'][start:end], y=df[attr_chosen].iloc[start:end], 
-                  title=country_chosen + " - " + attr_chosen, 
-                  labels={
-                     'x': "Year",
-                     'y': attr_chosen})         #### clara aenderung
     fig.update_layout(margin=dict(l=0, r=0, t=50, b=0))
-    fig.update_traces(line_color='lightpink')           #### clara aenderung
     return fig
 
 
