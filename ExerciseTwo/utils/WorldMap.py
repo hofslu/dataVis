@@ -22,15 +22,19 @@ def dev_build_world_map(hover_scatter, hover_map, style='orthographic'):
     else:
         pass
 
-    
-    countries = list(data['Country Code'].unique())
-    colors = ['red' if c == country else 'blue' for c in countries]
 
-    fig = px.choropleth(
+    
+    countries = pd.Series(data['Country Code'].unique())
+    colors = pd.Series(countries == country)
+    df = pd.concat([countries, colors], axis = 1)
+    df.columns = ['countries', 'color']
+    df = df.sort_values(by = 'color')
+
+    fig = px.choropleth(df,
         geojson=counties,
-        locations=countries, 
+        locations='countries', 
         locationmode="ISO-3", 
-        color=colors,
+        color='color',
         projection=style
         )
     

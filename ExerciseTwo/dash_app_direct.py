@@ -1,6 +1,7 @@
 from dash import Dash, html, dash_table, dcc, callback, Output, Input
 import dash_bootstrap_components as dbc
 import plotly.express as px
+import time
 
 import plotly.graph_objs as go
 
@@ -41,7 +42,9 @@ app.layout = build_app_layout(df)
     Input(component_id='map-graph', component_property='hoverData')]
 )
 def update_map(style, hover_scatter, hover_map):
-    return build_world_map(hover_scatter, hover_map, style)
+    time.sleep(0.01)
+    fig =  build_world_map(hover_scatter, hover_map, style)
+    return fig
 
 
 # -------- Scatter Plot ----------------------------
@@ -52,6 +55,9 @@ def update_map(style, hover_scatter, hover_map):
     Input(component_id='map-graph', component_property='hoverData')]
 )
 def update_scatter(col_chosen, hover_scatter, hover_map):
+    print(hover_map)
+    print(hover_scatter)
+    time.sleep(0.01)
     country = None
     if hover_scatter:
         country = hover_scatter['points'][0]['hovertext']
@@ -91,8 +97,8 @@ def update_scatter(col_chosen, hover_scatter, hover_map):
 # -------- Time Series -----------------------------
 @callback(
     Output(component_id='time-line-graph', component_property='figure'),
-    Input(component_id='map-graph', component_property='clickData'),
-    Input(component_id='drop-down-country-attribute-item', component_property='value')
+    [Input(component_id='map-graph', component_property='clickData'),
+    Input(component_id='drop-down-country-attribute-item', component_property='value')]
     # Input(component_id='scatter-graph', component_property='clickData'),
     # Input(component_id='drop-down-country-code-item', component_property='value'),
 )
@@ -124,6 +130,14 @@ def update_time_line(country_chosen, attr_chosen):
 # )
 # def update_debug_line(data):
 #     print(data)
+
+# reset hoverData for scatter
+@callback(
+    Output(component_id='scatter-graph', component_property='hoverData'),
+    Input(component_id='map-graph', component_property='hoverData')
+)
+def reset_hover_scatter(hover_map):
+    return None
 
 
 
