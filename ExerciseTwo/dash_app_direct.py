@@ -75,7 +75,6 @@ def update_graph(col_chosen):
     df_PCA = PrComAnalysis(df, col_chosen)          ####    clara aenderung
     fig = px.scatter(df_PCA, x=df_PCA['PC1'], y=df_PCA['PC2'], 
                      title = "PCA -" + col_chosen,
-                     
                      hover_name='Country Code',
                      hover_data = {'PC1': False, 'PC2':False})      #### clara aenderung
 
@@ -84,9 +83,7 @@ def update_graph(col_chosen):
     fig.update_layout(
         margin=dict(l=0, r=0, t=10, b=10),
         hoverlabel=dict(
-        bgcolor="white",
-        font_size=11,
-        font_family="Rockwell"
+        font_size=13
         )  
     )
     
@@ -105,8 +102,13 @@ def update_graph(country_chosen, attr_chosen):
     start = min(indices)
     end = max(indices)
     # x, y = from_function(df)
-    fig = px.line(df, x=df['year'][start:end], y=df[attr_chosen].iloc[start:end], title=country_chosen + " - " + attr_chosen)
+    fig = px.line(df, x=df['year'][start:end], y=df[attr_chosen].iloc[start:end], 
+                  title=country_chosen + " - " + attr_chosen, 
+                  labels={
+                     'x': "Year",
+                     'y': attr_chosen})         #### clara aenderung
     fig.update_layout(margin=dict(l=0, r=0, t=50, b=0))
+    fig.update_traces(line_color='lightpink')           #### clara aenderung
     return fig
 
 
