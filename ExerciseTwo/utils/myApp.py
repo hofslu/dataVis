@@ -2,8 +2,8 @@ from dash import Dash, html, dash_table, dcc, callback, Output, Input
 import dash_bootstrap_components as dbc
 import plotly.express as px
 
-from utils.WorldMap import build_world_map
-
+from utils.WorldMap import build_world_map, dev_build_world_map
+build_world_map = dev_build_world_map
 from urllib.request import urlopen
 import json
 

@@ -7,7 +7,7 @@ import pandas as pd
 
 import json
 
-def dev_build_world_map():
+def dev_build_world_map(df, counties):
     url = 'https://gist.githubusercontent.com/bquast/944781aa6dcc257ebf9aeee3c098b637/raw/871039f36e7b277a20d34619d72ec6b62957fe28/world-topo.json'
     with urlopen(url) as response:
         counties = json.load(response)
@@ -17,7 +17,7 @@ def dev_build_world_map():
         locations=['AUT', 'USA', 'DEU'], 
         locationmode="ISO-3", 
         color=[1, 1, 1],
-        # scope="usa"
+        projection='orthographic'
         )
     
     return fig
