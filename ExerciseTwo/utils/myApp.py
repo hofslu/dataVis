@@ -31,9 +31,9 @@ def build_app_layout(df):
 
     # App layout
     layout = dbc.Container([
-        # dbc.Row([
-        #     html.H1("This is our first python dash(board) app :)", id='debug-line')
-        # ]),
+        dbc.Row([
+            html.H1(" ", id='debug-line')
+        ]),
 
         dbc.Row([
             dbc.Col([

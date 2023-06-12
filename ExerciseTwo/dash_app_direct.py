@@ -15,6 +15,10 @@ from utils.myApp import build_app_layout
 import pandas as pd
 import os
 
+#####
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+#####
 
 # load data
 # df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
@@ -146,4 +150,6 @@ def reset_hover_scatter(hover_map):
 
 # Run the app
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(
+        port = 8051,
+        debug=True)
