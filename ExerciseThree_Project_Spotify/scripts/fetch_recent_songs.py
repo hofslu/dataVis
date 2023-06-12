@@ -1,6 +1,7 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
+import pandas as pd
 import argparse
 import json
 
@@ -30,17 +31,23 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=CLIENT_ID,
 results = sp.current_user_recently_played(limit=50)
 # print(json.dumps(results['items'][-1], indent=2))
 
-pop = 0
+
+fetched_songs = []
 for item in results['items']:
-    track = item['track']
-    # print(track)
-    print(
-        str(item['played_at']) +
-        str(track['popularity']) +
-        ' ' + track['name'] +
-        ' - ' + track['artists'][0]['name']
-    )
-    pop += int(track['popularity'])
+    item_data = {
+        "TIME_STAMP": item['played_at'],
+        "song_ID": item['track']['id'],
+        "song_Name": item['track']['name'],
+        "artist": item['track']['artists'][0]['name'],  # TODO for all artists
+        "album": item['track']['album']['id'],
+        "album_name": item['track']['album']['name'],
+        "popularity": item['track']['popularity'],
+        "explicit": item['track']['explicit'],
+    }
+    fetched_songs.append(item_data)
+
+df = pd.DataFrame(fetched_songs)
+print(df)
 
 
-print('corcy different kinda girl score: ' + str(pop/50))
+# print('corcy different kinda girl score: ' + str(pop/50))
