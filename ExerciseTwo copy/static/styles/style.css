@@ -1,0 +1,26 @@
+body {
+    padding-left: 5em;
+    font-family: Calibri, Arial, Helvetica, sans-serif;
+    color: #222222;
+    background-color: #fff;
+}
+.main_container { 
+    float: left; 
+    margin-bottom: 10px; 
+    padding-bottom: 100px}
+.container {
+    float: left;
+    display: table-cell;
+    vertical-align:top;
+    height: 500px;
+    padding: 10px;
+    border: 0px solid black;
+    text-align: center;
+    font-size: large;
+}
+
+.svg_line_chart {
+    float:left;
+    margin-top: 10px;
+}
+

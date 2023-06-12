@@ -27,9 +27,6 @@ def build_app_layout(df):
         dbc.Row([
             html.H3("This is our first python dash(board) app :)", id='debug-line', style={'color': 'deeppink'})
         ]),
-        dbc.Row([
-            html.H1(" ", id='debug-line')
-        ]),
 
         dbc.Row([
             dbc.Col([
