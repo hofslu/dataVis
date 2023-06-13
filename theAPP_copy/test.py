@@ -22,7 +22,14 @@ lightblackSpotify = 'rgb(41, 40, 40)'
 
 # reading in the data
 # df = pd.read_csv("/Users/clarapichler/Desktop/SS 2023/Informationsvisualisierung/dataVis/theAPP_copy/claras_songs.csv")
-df = get_df(1,2)
+
+LUKAS_CLIENT_ID = "207e1c72689d4a0a88e0e721cb9bb254"
+LUKAS_CLIENT_SECRET = "2b98d70fb10b4ca1b0008405a353d35c"
+
+CLARA_CLIENT_ID = "b8db48d0784f4e2b9ab719adc118e918"
+CLARA_CLIENT_SECRET = "0a7feca73df44f1c829f125dbe8a6b91"
+
+df = get_df(CLARA_CLIENT_ID, CLARA_CLIENT_SECRET)
 
 trackName = df["song_Name"]
 artist = df["artist"]
@@ -34,9 +41,14 @@ timeStamp = timeStamp + timedelta(hours=2)
 BBscore = str(df["popularity"].mean())
 
 # AB HIER BRAUCH ICH DAS NEUE DATAFRAME
-# features = ["danceability", "liveness", "energy", "instrumentalness", "speechiness", "acoustiness"]
-# mean_values_spider = df[features].mean()
-mean_values_spider = [0.2, 0.4, 0.8, 0.5, 0.1, 0.1415]
+features = ['danceability',
+            'liveness',
+            'energy',
+            'instrumentalness',
+            'speechiness',
+            'acousticness']
+mean_values_spider = df[features].mean()
+# mean_values_spider = [0.2, 0.4, 0.8, 0.5, 0.1, 0.1415]
 
 
 # building the app
@@ -62,7 +74,7 @@ app.layout = html.Div([
     ]),
     # Song Info
     html.Div(id='song-info', className='neonBox'),
-    
+
     # Time Line
     html.Div(id='timeline', className='neonBox', children=[
         dcc.Graph(figure={}, id='timeline-graph')
@@ -73,21 +85,20 @@ app.layout = html.Div([
 # -------- Radar(Spider) Plot ----------------------------
 
 def radarPlot(values, values2):
-    subjects = ["danceability", "liveness", "energy",
-                "instrumentalness", "speechiness", "acoustiness"]
+    subjects = features
 
     df_radar = pd.DataFrame({'subjects': subjects, 'values': values})
 
-    fig = px.line_polar(df_radar, r='values', theta='subjects',
+    fig = px.line_polar(df_radar, r=values, theta=subjects,
                         line_close=True,
                         color_discrete_sequence=[greenSpotify])
-    
-    if len(values2) is not 0:
+
+    if values2 is not None:
+        # pass
         df_radar2 = pd.DataFrame({'subjects': subjects, 'values': values2})
-        fig.add_trace(px.line_polar(df_radar2, r='values', theta='subjects', 
+        fig.add_trace(px.line_polar(df_radar2, r=values, theta=subjects,
                                     line_close=True,
                                     color_discrete_sequence=["green"]))
-
 
     fig.update_traces(fill="toself")
 
@@ -117,10 +128,16 @@ def radarPlot(values, values2):
     Output(component_id='spyder-graph', component_property='figure'),
     Input('timeline-graph', 'clickData')
 )
-def update_spyder_graph(value):
-    return radarPlot(mean_values_spider)
+def update_spyder_graph(click_data):
+    # print(click_data)
+    if click_data is None:
+        return radarPlot(mean_values_spider, None)
 
+    point_index = click_data['points'][0]['pointIndex']
 
+    song_features = df.iloc[point_index][features]
+
+    return radarPlot(mean_values_spider, song_features)
 
 
 # -------- Time Plot ----------------------------
@@ -172,7 +189,6 @@ def update_timeline_graph(value):
     return timelineTracks(trackName, timeStamp, artist)
 
 
-
 # # -------- Song Info ----------------------------
 
 @app.callback(
@@ -182,21 +198,23 @@ def update_timeline_graph(value):
 def update_song_info(click_data):
     if click_data is not None:
         point_index = click_data['points'][0]['pointIndex']
-        track_info = str(trackName[point_index]) + " by " + str(artist[point_index])
-    
+        track_info = str(trackName[point_index]) + \
+            " by " + str(artist[point_index])
+
         return html.Div([
             html.Div(id='song-box', className='neonText',
-                 children='Song Information'),
-            html.Div(id='selected-song', className='neonText', children=track_info )
+                     children='Song Information'),
+            html.Div(id='selected-song', className='neonText',
+                     children=track_info)
         ])
-    
+
     return html.Div([
-            html.Div(id='song-box', className='neonText',
+        html.Div(id='song-box', className='neonText',
                  children='Song Information'),
-            html.Div(id='selected-song', className='neonText', children="Please select a Song in\nthe Time Line" )
-        ])
-    
-    
+        html.Div(id='selected-song', className='neonText',
+                 children="Please select a Song in\nthe Time Line")
+    ])
+
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
