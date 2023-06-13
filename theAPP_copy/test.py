@@ -21,18 +21,19 @@ lightblackSpotify = 'rgb(41, 40, 40)'
 # reading in the data
 df = pd.read_csv("/home/johannes/Dokumente/tu/info_vis/dataVis/theAPP_copy/data/claras_songs.csv")
 
-trackName = df["song_Name"]
-artist = df["artist"]
+trackName = [df["song_Name"], df["song_Name"]]
+artist = [df["artist"], df["artist"]]
 timeStamp = df["TIME_STAMP"] 
 timeStamp = pd.to_datetime(timeStamp)
 timeStamp = timeStamp + timedelta(hours=2)   # adding 2 hours because the time is not right
+timeStamp = [timeStamp, timeStamp]
 
 BBscore = str(df["popularity"].mean())
 
 ### AB HIER BRAUCH ICH DAS NEUE DATAFRAME
 # features = ["danceability", "liveness", "energy", "instrumentalness", "speechiness", "acoustiness"]
 # mean_values_spider = df[features].mean()
-mean_values_spider = [0.2,0.4,0.8, 0.5, 0.1, 0.1415]
+mean_values_spider = [[0.2,0.4,0.8, 0.5, 0.1, 0.1415], [0.1,0.5,0.6, 0.7, 0.3, 0.2415]]
 
 
 # building the app
@@ -69,17 +70,24 @@ app.layout = html.Div([
 
 # -------- Radar(Spider) Plot ----------------------------
 
-def radarPlot(values):
+def radarPlot(nested_list_values):
     subjects = ["danceability", "liveness", "energy",
                 "instrumentalness", "speechiness", "acoustiness"]
+    
+    df_radar = pd.DataFrame({'subjects': [], 'values': [], 'dummy': []})
 
-    df_radar = pd.DataFrame({'subjects': subjects, 'values': values})
+    for i in range(len(nested_list_values)):
+        values = nested_list_values[i]
+        df_temp = pd.DataFrame({'subjects': subjects, 'values': values, 'dummy': [i for k in values]})
+        df_radar = pd.concat([df_radar, df_temp], axis = 0)
 
     fig = px.line_polar(df_radar, r='values', theta='subjects',
+                        color = 'dummy',
                         line_close=True,
-                        color_discrete_sequence=[greenSpotify])
+                        color_discrete_sequence=px.colors.sequential.Plasma_r)
 
     fig.update_traces(fill="toself")
+    fig.update_layout(showlegend=False)
 
     fig.update_polars(bgcolor=blackSpotify)
 
@@ -116,14 +124,20 @@ def update_spyder_graph(value):
 # -------- Time Plot ----------------------------
 
 
-def timelineTracks(col_tracks, col_time, artist):
-    df_timeline = pd.DataFrame({'col_time': col_time, 'col_tracks': col_tracks, 'artist': artist})
+def timelineTracks(nested_list_trackName, nested_list_timeStamp, nested_list_artist):
+    df_timeline = pd.DataFrame({'col_time': [], 'col_tracks': [], 'artist': [], 'dummy': []})
+    for i in range(len(nested_list_artist)):
+        col_time = nested_list_timeStamp[i]
+        col_tracks = nested_list_trackName[i]
+        artist = nested_list_artist[i]
+        df_temp = pd.DataFrame({'col_time': col_time, 'col_tracks': col_tracks, 'artist': artist, 'dummy': [i for k in col_time]})
+        df_timeline = pd.concat([df_timeline, df_temp], axis = 0)
 
-    fig = px.scatter(df_timeline, x='col_time', y=[0] * len(col_time),
+    fig = px.scatter(df_timeline, x='col_time', y='dummy', color = 'dummy',
                      title="Time Line of the last Songs you've listened to",
                      #hover_name='col_tracks' + ' - ' + 'artist',
                      hover_data={'col_time': False, 'col_tracks': False, 'artist': False},
-                     color_discrete_sequence=[greenSpotify])
+                     color_discrete_sequence = px.colors.sequential.Plasma_r)
 
     fig.update_traces(marker=dict(size=15, opacity=0.6),
                       hovertemplate='<b>%{text}</b><br><br>%{x}',
