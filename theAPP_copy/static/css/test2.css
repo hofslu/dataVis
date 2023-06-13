@@ -65,21 +65,21 @@ body {
 
 #spider-chart {
     position: absolute;
-    left: 2vw;
+    left: 30vw;
     top: 15vh;
 
+    transform: translate(-50%, 0);
     width: 28vw;
     height: 50vh;
-    background-color: rgba(0,0,0,0);
+    background-color: rgba(0, 0, 0, 0);
     box-shadow: none;
-    margin-top: 10%;
-    transform: translateY(-50%);
-    
+    scale: 1.5;
+
 }
 
-#spyder-graph {
+/* #spyder-graph {
     height: 120%;
-}
+} */
 
 #timeline {
     position: absolute;

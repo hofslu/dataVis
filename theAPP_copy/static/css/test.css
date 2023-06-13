@@ -44,13 +44,7 @@ body {
         inset 0 0 1.0rem #1DB954;
 }
 
-#bbScore {
-    font-size: 200%;
-}
 
-#userName {
-    font-size: 270%;
-}
 
 #user-info {
     position: absolute;
@@ -69,6 +63,23 @@ body {
     width: 28vw;
     height: 50vh;
 }
+
+#bbScore {
+    font-size: 200%;
+}
+
+#info-header {
+    font-size: 270%;
+}
+
+#song-box {
+    font-size: 200%;
+}
+
+#selected-song {
+    font-size: 150%;
+}
+
 
 #spider-chart {
     position: absolute;
