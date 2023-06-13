@@ -5,11 +5,13 @@
 """
 
 import dash
-from dash import dcc, html, callback, Output, Input
+from dash import dcc, html, callback, Output, Input, State
 import pandas as pd
 import plotly.express as px
 import os
 from datetime import datetime, timedelta
+
+from scripts.utils import get_df
 
 
 greenSpotify = 'rgb(30, 215, 96)'   # the official green spotify uses
@@ -19,7 +21,8 @@ blackSpotify = 'rgb(25, 20, 20)'
 lightblackSpotify = 'rgb(41, 40, 40)'
 
 # reading in the data
-df = pd.read_csv("/Users/clarapichler/Desktop/SS 2023/Informationsvisualisierung/dataVis/theAPP_copy/claras_songs.csv")
+# df = pd.read_csv("/Users/clarapichler/Desktop/SS 2023/Informationsvisualisierung/dataVis/theAPP_copy/claras_songs.csv")
+df = get_df(1,2)
 
 trackName = df["song_Name"]
 artist = df["artist"]
@@ -52,10 +55,11 @@ app.layout = html.Div([
     # Spider Chart
     html.Div(id='spider-chart', className='neonBox', children=[
         dcc.Graph(figure={}, id='spyder-graph')
+
     ]),
     # Song Info
-    html.Div(id='song-info', className='neonBox')
-    ,
+    html.Div(id='song-info', className='neonBox'),
+    
     # Time Line
     html.Div(id='timeline', className='neonBox', children=[
         dcc.Graph(figure={}, id='timeline-graph')
@@ -68,7 +72,7 @@ app.layout = html.Div([
 
 # -------- Radar(Spider) Plot ----------------------------
 
-def radarPlot(values):
+def radarPlot(values, values2):
     subjects = ["danceability", "liveness", "energy",
                 "instrumentalness", "speechiness", "acoustiness"]
 
@@ -77,6 +81,13 @@ def radarPlot(values):
     fig = px.line_polar(df_radar, r='values', theta='subjects',
                         line_close=True,
                         color_discrete_sequence=[greenSpotify])
+    
+    if len(values2) is not 0:
+        df_radar2 = pd.DataFrame({'subjects': subjects, 'values': values2})
+        fig.add_trace(px.line_polar(df_radar2, r='values', theta='subjects', 
+                                    line_close=True,
+                                    color_discrete_sequence=["green"]))
+
 
     fig.update_traces(fill="toself")
 
@@ -104,10 +115,16 @@ def radarPlot(values):
 
 @callback(
     Output(component_id='spyder-graph', component_property='figure'),
-    Input('my-input', 'value')
+    Input('timeline-graph', 'clickData')
 )
-def update_spyder_graph(value):
-    return radarPlot(mean_values_spider)
+def update_spyder_graph(click_data):
+    if click_data is None:
+        return radarPlot(mean_values_spider, [])
+    
+    point_index = click_data['points'][0]['pointIndex']
+    song_features = df[point_index][["danceability", "liveness", "energy",
+                                    "instrumentalness", "speechiness", "acoustiness"]]
+    return radarPlot(mean_values_spider, song_features)
 
 
 
@@ -152,12 +169,37 @@ def timelineTracks(col_tracks, col_time, artist):
 
 @callback(
     Output(component_id='timeline-graph', component_property='figure'),
-    Input('my-input', 'value')
+    Input('timeline-graph', 'value')
 )
 def update_timeline_graph(value):
     return timelineTracks(trackName, timeStamp, artist)
 
 
+
+# # -------- Song Info ----------------------------
+
+@app.callback(
+    Output('song-info', 'children'),
+    Input('timeline-graph', 'clickData')
+)
+def update_song_info(click_data):
+    if click_data is not None:
+        point_index = click_data['points'][0]['pointIndex']
+        track_info = str(trackName[point_index]) + " by " + str(artist[point_index])
+    
+        return html.Div([
+            html.Div(id='song-box', className='neonText',
+                 children='Song Information'),
+            html.Div(id='selected-song', className='neonText', children=track_info )
+        ])
+    
+    return html.Div([
+            html.Div(id='song-box', className='neonText',
+                 children='Song Information'),
+            html.Div(id='selected-song', className='neonText', children="Please select a Song in\nthe Time Line" )
+        ])
+    
+    
 
 if __name__ == '__main__':
     app.run_server(debug=False)
