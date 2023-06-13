@@ -20,6 +20,20 @@ blackSpotify = 'rgb(25, 20, 20)'
 # the other black - so its not so monotone
 lightblackSpotify = 'rgb(41, 40, 40)'
 
+# reading in the data
+df = pd.read_csv('./data/claras_songs.csv')
+
+trackName = df["song_Name"]
+timeStamp = df["TIME_STAMP"]
+timeStamp = pd.to_datetime(timeStamp)
+
+BBscore = df["popularity"].mean()
+
+features = ["danceability", "liveness", "energy", "instrumentalness", "speechiness", "acoustiness"]
+mean_values_spider = df[features].mean()
+
+
+
 
 app = dash.Dash(__name__, external_stylesheets=['../static/css/test.css'])
 
@@ -56,10 +70,12 @@ app.layout = html.Div([
 ])
 
 
-def radarPlot(dance, live, energy, instru, speech, acoust):
+
+# -------- Radar(Spider) Plot ----------------------------
+
+def radarPlot(values):
     subjects = ["danceability", "liveness", "energy",
                 "instrumentalness", "speechiness", "acoustiness"]
-    values = [dance, live, energy, instru, speech, acoust]
 
     df_radar = pd.DataFrame({'subjects': subjects, 'values': values})
 
@@ -96,12 +112,16 @@ def radarPlot(dance, live, energy, instru, speech, acoust):
     Input('my-input', 'value')
 )
 def update_spyder_graph(value):
-    return radarPlot(0.2, 0.6, 0.04, 0.3, 0.8, 0.9)
+    return radarPlot(mean_values_spider)
+
+
+
+
+# -------- Time Plot ----------------------------
 
 
 def timelineTracks(col_tracks, col_time):
-    colTime = pd.to_datetime(col_time)
-    df_timeline = pd.DataFrame({'col_time': colTime, 'col_tracks': col_tracks})
+    df_timeline = pd.DataFrame({'col_time': col_time, 'col_tracks': col_tracks})
 
     fig = px.scatter(df_timeline, x='col_time', y=[0] * len(col_time),
                      title="Time Line of the last Songs you've listened to",
@@ -116,7 +136,8 @@ def timelineTracks(col_tracks, col_time):
 
     fig.add_hline(y=0, line_color=greenSpotify)
 
-    fig.update_xaxes(title_text=' ')
+    fig.update_xaxes(title_text=' ',
+                     tickfont=dict(color='white'))
 
     fig.update_layout(
         margin=dict(l=0, r=0, t=30, b=10),
@@ -125,6 +146,7 @@ def timelineTracks(col_tracks, col_time):
         ),
         yaxis=dict(visible=False),
         showlegend=False,
+        title_font=dict(color='white'),
 
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',  # this makes the background transparent
@@ -138,13 +160,8 @@ def timelineTracks(col_tracks, col_time):
     Input('my-input', 'value')
 )
 def update_timeline_graph(value):
-    times = ["2023-06-12T16:06:43.007Z", "2023-06-12T16:42:41.080Z",
-             "2023-06-11T16:02:41.080Z", "2023-06-11T22:02:41.080Z",
-             "2023-06-12T01:02:41.080Z"]
-    tracks = ["song - 12.6 um 16:06", "song - 12.6 um 16:02",
-              "song - 11.6 um 16:02", "song - 11.6 um 22",
-              "song - 12.6 um 01"]
-    return timelineTracks(tracks, times)
+    
+    return timelineTracks(trackName, timeStamp)
 
 
 if __name__ == '__main__':
