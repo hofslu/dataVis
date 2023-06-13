@@ -19,20 +19,21 @@ blackSpotify = 'rgb(25, 20, 20)'
 lightblackSpotify = 'rgb(41, 40, 40)'
 
 # reading in the data
-df = pd.read_csv("/home/johannes/Dokumente/tu/info_vis/dataVis/theAPP_copy/data/claras_songs.csv")
+df = pd.read_csv("./data/claras_songs.csv")
 
 trackName = df["song_Name"]
 artist = df["artist"]
-timeStamp = df["TIME_STAMP"] 
+timeStamp = df["TIME_STAMP"]
 timeStamp = pd.to_datetime(timeStamp)
-timeStamp = timeStamp + timedelta(hours=2)   # adding 2 hours because the time is not right
+# adding 2 hours because the time is not right
+timeStamp = timeStamp + timedelta(hours=2)
 
 BBscore = str(df["popularity"].mean())
 
-### AB HIER BRAUCH ICH DAS NEUE DATAFRAME
+# AB HIER BRAUCH ICH DAS NEUE DATAFRAME
 # features = ["danceability", "liveness", "energy", "instrumentalness", "speechiness", "acoustiness"]
 # mean_values_spider = df[features].mean()
-mean_values_spider = [0.2,0.4,0.8, 0.5, 0.1, 0.1415]
+mean_values_spider = [0.2, 0.4, 0.8, 0.5, 0.1, 0.1415]
 
 
 # building the app
@@ -40,7 +41,8 @@ app = dash.Dash(__name__, external_stylesheets=['../static/css/test2.css'])
 
 app.layout = html.Div([
     # Header
-    html.Div(id = 'header', className = 'neonBox', children= 'Spotify User Dashboard'),
+    html.Div(id='header', className='neonBox',
+             children='Spotify User Dashboard'),
     # User Info
     html.Div(id='user-info', className='neonBox', children=[
         html.Div(id='info-header', className='neonText',
@@ -48,23 +50,19 @@ app.layout = html.Div([
         dcc.Input(id='my-input', value='initial value',
                   type='text'),  # dummy input
         html.Div(className='neonText', children='Basic bitch score:'),
-        html.Div(id='bbScore', className='neonText', children=BBscore )
+        html.Div(id='bbScore', className='neonText', children=BBscore)
     ]),
     # Spider Chart
     html.Div(id='spider-chart', className='neonBox', children=[
         dcc.Graph(figure={}, id='spyder-graph')
     ]),
     # Song Info
-    html.Div(id='song-info', className='neonBox')
-    ,
+    html.Div(id='song-info', className='neonBox'),
     # Time Line
     html.Div(id='timeline', className='neonBox', children=[
         dcc.Graph(figure={}, id='timeline-graph')
     ])
 ])
-
-
-
 
 
 # -------- Radar(Spider) Plot ----------------------------
@@ -111,23 +109,24 @@ def update_spyder_graph(value):
     return radarPlot(mean_values_spider)
 
 
-
-
 # -------- Time Plot ----------------------------
 
 
 def timelineTracks(col_tracks, col_time, artist):
-    df_timeline = pd.DataFrame({'col_time': col_time, 'col_tracks': col_tracks, 'artist': artist})
+    df_timeline = pd.DataFrame(
+        {'col_time': col_time, 'col_tracks': col_tracks, 'artist': artist})
 
     fig = px.scatter(df_timeline, x='col_time', y=[0] * len(col_time),
                      title="Time Line of the last Songs you've listened to",
-                     #hover_name='col_tracks' + ' - ' + 'artist',
-                     hover_data={'col_time': False, 'col_tracks': False, 'artist': False},
+                     # hover_name='col_tracks' + ' - ' + 'artist',
+                     hover_data={'col_time': False,
+                                 'col_tracks': False, 'artist': False},
                      color_discrete_sequence=[greenSpotify])
 
     fig.update_traces(marker=dict(size=15, opacity=0.6),
                       hovertemplate='<b>%{text}</b><br><br>%{x}',
-                      text=df_timeline['col_tracks'] + " - " + df_timeline['artist'],
+                      text=df_timeline['col_tracks'] +
+                      " - " + df_timeline['artist'],
                       hoverlabel=dict(bgcolor=greenSpotify))
 
     fig.add_hline(y=0, line_color=greenSpotify)
@@ -157,7 +156,6 @@ def timelineTracks(col_tracks, col_time, artist):
 )
 def update_timeline_graph(value):
     return timelineTracks(trackName, timeStamp, artist)
-
 
 
 if __name__ == '__main__':
