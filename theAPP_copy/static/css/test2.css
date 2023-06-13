@@ -8,7 +8,7 @@ html {
     padding: 0;
     width: 100vw;
     height: 100vh;
-    background-color: black;
+    background-color: rgb(41, 40, 40);
 }
 
 body {
@@ -32,19 +32,18 @@ body {
 
 .neonBox {
     background-color: rgb(0, 0, 0);
-    border: solid rgba(255, 255, 255, 0.861) 1px;
-    border-radius: 50px;
     padding: 25px;
     box-sizing: border-box;
-    box-shadow: 0 0 .2rem #fff,
-        0 0 .2rem #ffffff,
-        0 0 0.4rem #1DB954,
-        0 0 0.8rem #1DB954,
-        0 0 0.8rem #1DB954,
-        inset 0 0 1.0rem #1DB954;
+    box-shadow: 6px 6px 6px 0px rgba(25, 20, 20);
 }
 
+#bbScore {
+    font-size: 200%;
+}
 
+#userName {
+    font-size: 270%;
+}
 
 #user-info {
     position: absolute;
@@ -64,23 +63,6 @@ body {
     height: 50vh;
 }
 
-#bbScore {
-    font-size: 200%;
-}
-
-#info-header {
-    font-size: 270%;
-}
-
-#song-box {
-    font-size: 200%;
-}
-
-#selected-song {
-    font-size: 150%;
-}
-
-
 #spider-chart {
     position: absolute;
     left: 2vw;
@@ -88,19 +70,23 @@ body {
 
     width: 28vw;
     height: 50vh;
+    background-color: rgba(0,0,0,0);
+    box-shadow: none;
+    margin-top: 10%;
+    transform: translateY(-50%);
+    
 }
 
 #spyder-graph {
-    height: 100%;
+    height: 120%;
 }
 
 #timeline {
     position: absolute;
-    left: 30px;
-    right: 30px;
-    bottom: 20px;
+    left: 0vw;
+    bottom: 0vh;
 
-    width: auto;
+    width: 100vw;
     height: 28vh;
 }
 
@@ -121,12 +107,12 @@ body {
 }
 
 #header {
-    width: 28vw;
+    width: 100vw;
     height: 10vh;
 
     position: absolute;
-    top: 2vh;
-    left: 2vw;
+    top: 0vh;
+    left: 0vw;
 
     color: white;
     font-size: 2em;
