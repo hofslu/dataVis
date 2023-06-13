@@ -65,15 +65,15 @@ body {
 
 #spider-chart {
     position: absolute;
-    left: 30vw;
+    left: 2vw;
     top: 15vh;
 
-    transform: translate(-50%, 0);
+    /*transform: translate(-10%, 0);*/
     width: 28vw;
     height: 50vh;
     background-color: rgba(0, 0, 0, 0);
     box-shadow: none;
-    scale: 1.5;
+    scale: 1;
 
 }
 
@@ -117,4 +117,9 @@ body {
     color: white;
     font-size: 2em;
     text-align: center;
+}
+
+#checklist {
+    color: white;
+    font-size: 1em;
 }
