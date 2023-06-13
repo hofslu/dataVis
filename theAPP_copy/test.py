@@ -9,6 +9,7 @@ from dash import dcc, html, callback, Output, Input
 import pandas as pd
 import plotly.express as px
 import os
+from datetime import datetime, timedelta
 
 
 greenSpotify = 'rgb(30, 215, 96)'   # the official green spotify uses
@@ -22,8 +23,9 @@ df = pd.read_csv("/Users/clarapichler/Desktop/SS 2023/Informationsvisualisierung
 
 trackName = df["song_Name"]
 artist = df["artist"]
-timeStamp = df["TIME_STAMP"]
+timeStamp = df["TIME_STAMP"] 
 timeStamp = pd.to_datetime(timeStamp, format = 'ISO8601')
+timeStamp = timeStamp + timedelta(hours=2)   # adding 2 hours because the time is not right
 
 BBscore = str(df["popularity"].mean())
 
@@ -51,6 +53,9 @@ app.layout = html.Div([
     html.Div(id='spider-chart', className='neonBox', children=[
         dcc.Graph(figure={}, id='spyder-graph')
     ]),
+    # Song Info
+    html.Div(id='song-info', className='neonBox')
+    ,
     # Time Line
     html.Div(id='timeline', className='neonBox', children=[
         dcc.Graph(figure={}, id='timeline-graph')
@@ -150,7 +155,7 @@ def timelineTracks(col_tracks, col_time, artist):
     Input('my-input', 'value')
 )
 def update_timeline_graph(value):
-    return timelineTracks(trackName, timeStamp)
+    return timelineTracks(trackName, timeStamp, artist)
 
 
 
