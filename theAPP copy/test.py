@@ -3,9 +3,6 @@
 [Resouces]
     RangeSlider: https://community.plotly.com/t/dash-range-slider-with-date/17915/5 
 
-
-TODO: Dataframe time to datetime-Object
-
 """
 
 import dash
@@ -24,17 +21,18 @@ lightblackSpotify = 'rgb(41, 40, 40)'
 df = pd.read_csv('./data/claras_songs.csv')
 
 trackName = df["song_Name"]
+artist = df["artist"]
 timeStamp = df["TIME_STAMP"]
 timeStamp = pd.to_datetime(timeStamp)
 
-BBscore = df["popularity"].mean()
+BBscore = str(df["popularity"].mean())
 
 features = ["danceability", "liveness", "energy", "instrumentalness", "speechiness", "acoustiness"]
 mean_values_spider = df[features].mean()
 
 
 
-
+# building the app
 app = dash.Dash(__name__, external_stylesheets=['../static/css/test.css'])
 
 app.layout = html.Div([
@@ -46,7 +44,7 @@ app.layout = html.Div([
                   type='text'),  # dummy input
 
         html.Div(className='neonText', children='Basic bitch score:'),
-        html.Div(id='bbScore', className='neonText', children='99')
+        html.Div(id='bbScore', className='neonText', children=BBscore)
     ]),
     # Spider Chart
     html.Div(id='spider-chart', className='neonBox', children=[
@@ -120,13 +118,13 @@ def update_spyder_graph(value):
 # -------- Time Plot ----------------------------
 
 
-def timelineTracks(col_tracks, col_time):
-    df_timeline = pd.DataFrame({'col_time': col_time, 'col_tracks': col_tracks})
+def timelineTracks(col_tracks, col_time, artist):
+    df_timeline = pd.DataFrame({'col_time': col_time, 'col_tracks': col_tracks, 'artist': artist})
 
     fig = px.scatter(df_timeline, x='col_time', y=[0] * len(col_time),
                      title="Time Line of the last Songs you've listened to",
-                     hover_name='col_tracks',
-                     hover_data={'col_time': False, 'col_tracks': False},
+                     hover_name='col_tracks' + ' - ' + 'artist',
+                     hover_data={'col_time': False, 'col_tracks': False, 'artist': False},
                      color_discrete_sequence=[greenSpotify])
 
     fig.update_traces(marker=dict(size=15, opacity=0.6),
