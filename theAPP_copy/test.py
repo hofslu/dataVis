@@ -19,12 +19,12 @@ blackSpotify = 'rgb(25, 20, 20)'
 lightblackSpotify = 'rgb(41, 40, 40)'
 
 # reading in the data
-df = pd.read_csv("/Users/clarapichler/Desktop/SS 2023/Informationsvisualisierung/dataVis/theAPP_copy/claras_songs.csv")
+df = pd.read_csv("/home/johannes/Dokumente/tu/info_vis/dataVis/theAPP_copy/data/claras_songs.csv")
 
 trackName = df["song_Name"]
 artist = df["artist"]
 timeStamp = df["TIME_STAMP"] 
-timeStamp = pd.to_datetime(timeStamp, format = 'ISO8601')
+timeStamp = pd.to_datetime(timeStamp)
 timeStamp = timeStamp + timedelta(hours=2)   # adding 2 hours because the time is not right
 
 BBscore = str(df["popularity"].mean())
@@ -36,16 +36,17 @@ mean_values_spider = [0.2,0.4,0.8, 0.5, 0.1, 0.1415]
 
 
 # building the app
-app = dash.Dash(__name__, external_stylesheets=['../static/css/test.css'])
+app = dash.Dash(__name__, external_stylesheets=['../static/css/test2.css'])
 
 app.layout = html.Div([
+    # Header
+    html.Div(id = 'header', className = 'neonBox', children= 'Spotify User Dashboard'),
     # User Info
     html.Div(id='user-info', className='neonBox', children=[
         html.Div(id='info-header', className='neonText',
                  children='Clara Fall'),
         dcc.Input(id='my-input', value='initial value',
                   type='text'),  # dummy input
-
         html.Div(className='neonText', children='Basic bitch score:'),
         html.Div(id='bbScore', className='neonText', children=BBscore )
     ]),
