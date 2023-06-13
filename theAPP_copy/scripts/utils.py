@@ -13,8 +13,8 @@ CLIENT_ID = "b8db48d0784f4e2b9ab719adc118e918"
 CLIENT_SECRET = "0a7feca73df44f1c829f125dbe8a6b91"
 
 
-def get_df(iserID, userSecret):
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=iserID,
+def get_df(userID, userSecret, debug=False):
+    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=userID,
                                                    client_secret=userSecret,
                                                    redirect_uri="http://localhost:3000",
                                                    scope="user-read-recently-played"))
@@ -72,4 +72,4 @@ def get_df(iserID, userSecret):
 
 
 if __name__ == "__main__":
-    print(get_df(CLIENT_ID, CLIENT_SECRET))
+    print(get_df(CLIENT_ID, CLIENT_SECRET, debug=True))
