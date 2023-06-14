@@ -17,7 +17,7 @@ from dash_table.Format import Group
 from scripts.utils import get_df
 
 # colors
-greenSpotify = 'rgb(30, 215, 96)'   
+greenSpotify = 'rgb(30, 215, 96)'
 blackSpotify = 'rgb(25, 20, 20)'
 lightblackSpotify = 'rgb(41, 40, 40)'
 
@@ -33,19 +33,23 @@ name_colors = ['limegreen', 'darkturquoise', 'deeppink']
 
 # df = get_df(CLARA_CLIENT_ID, CLARA_CLIENT_SECRET)
 
-df_clara = pd.read_csv("//Users/clarapichler/Desktop/SS 2023/Informationsvisualisierung/dataVis/theAPP_copy/data/claras_songs.csv")
-df_lukas = pd.read_csv("//Users/clarapichler/Desktop/SS 2023/Informationsvisualisierung/dataVis/theAPP_copy/data/claras_songs.csv")
-df_johannes = pd.read_csv("//Users/clarapichler/Desktop/SS 2023/Informationsvisualisierung/dataVis/theAPP_copy/data/claras_songs.csv")
+df_clara = pd.read_csv("./data/claras_songs.csv")
+df_lukas = pd.read_csv("./data/claras_songs.csv")
+df_johannes = pd.read_csv("./data/claras_songs.csv")
 dict_df = {'Clara': df_clara, 'Lukas': df_lukas, 'Johannes': df_johannes}
 df = df_clara
 
 timeStamp = df["TIME_STAMP"]
-timeStamp = pd.to_datetime(timeStamp, format='mixed')
-timeStamp = timeStamp + timedelta(hours=2)   # adding 2 hours because the time is not right
+print(timeStamp[0])
+print(type(timeStamp[0]))
+timeStamp = pd.to_datetime(timeStamp)
+# adding 2 hours because the time is not right
+timeStamp = timeStamp + timedelta(hours=2)
 
-BBscore = str(np.round(df["popularity"].mean(),2))
+BBscore = str(np.round(df["popularity"].mean(), 2))
 
-features = ["danceability","energy","speechiness","acousticness","instrumentalness","liveness"]
+features = ["danceability", "energy", "speechiness",
+            "acousticness", "instrumentalness", "liveness"]
 features_mean_clara = np.round(df[features].mean().values, 2)
 
 
@@ -63,12 +67,26 @@ app.layout = html.Div([
     html.Div(id='user-info', className='neonBox', children=[
         html.Div(id='user', className='neonText',
                  children='Spotify User Data'),
-        dcc.Input(id='my-input', value='initial value',
-                  type='text'),  # dummy input
         # html.Div(className='neonText', children='Basic bitch score:'),
         # html.Div(id='bbScore', className='neonText', children=BBscore),
-        dcc.Checklist(['Clara', 'Lukas', 'Johannes'], ['Clara'], 
-                      id = 'checklist')
+        dcc.Checklist(
+            ['Clara', 'Lukas', 'Johannes'],
+            # options=[
+            #     {'label': html.Label(
+            #         'Clara', className=''), 'value': 'Clara'},
+            #     {'label': html.Label(
+            #         'Lukas', className=''), 'value': 'Lukas'},
+            #     {'label': html.Label(
+            #         'Johannes', className=''), 'value': 'Johannes'}
+            # ],
+            value=['Clara'],
+            id='checklist',
+            inputClassName='checkboxDash'
+        ),
+
+        # User scores
+        html.Div(id='table-scores', className=''
+                 ),
     ]),
     # Spider Chart
     html.Div(id='spider-chart', className='neonBox', children=[
@@ -78,13 +96,11 @@ app.layout = html.Div([
     # Song Info
     html.Div(id='song-info', className='neonBox'
              ),
-    # User scores
-    html.Div(id='table-scores', className='neonBox'
-    ),
+
     # Time Line
     html.Div(id='timeline', className='neonBox', children=[
         html.Div(id='title_timeline', className='neonText',
-                children='Time Line of the last 50 recently played Songs'),
+                 children='Time Line of the last 50 recently played Songs'),
         dcc.Graph(figure={}, id='timeline-graph')
     ])
 ])
@@ -98,12 +114,14 @@ def radarPlot(df_radar_input):
 
     for i in range(len(df_radar_input)):
         values = df_radar_input.loc[i, subjects]
-        df_temp = pd.DataFrame({'subjects': subjects, 'values': values, 'Account':[df_radar_input.loc[i,"name"] for _ in values]})
+        df_temp = pd.DataFrame({'subjects': subjects, 'values': values, 'Account': [
+                               df_radar_input.loc[i, "name"] for _ in values]})
         df_radarplot = pd.concat([df_radarplot, df_temp], ignore_index=True)
 
-    fig = px.line_polar(df_radarplot, r='values', theta='subjects', color = 'Account',
+    fig = px.line_polar(df_radarplot, r='values', theta='subjects', color='Account',
                         # line_close=True, THIS BITCH GAVE ME AN ERROR I WAS LOOKING EVERYWHERE FOR
-                        color_discrete_sequence=name_colors[:len(df_radar_input["name"])]
+                        color_discrete_sequence=name_colors[:len(
+                            df_radar_input["name"])]
                         )
 
     fig.update_traces(fill="toself")
@@ -125,7 +143,7 @@ def radarPlot(df_radar_input):
         ),
         paper_bgcolor='rgba(0,0,0,0)',  # this makes the background transparent
         plot_bgcolor='rgba(0,0,0,0)',
-        font_color = 'white'
+        font_color='white'
     )
 
     return fig
@@ -137,47 +155,46 @@ def radarPlot(df_radar_input):
 )
 def update_spyder_graph(checked):
     cols = features+["name"]
-    if checked is None or checked == []: 
-        df_radar = pd.DataFrame(data=[], columns=features+ ["name"])
-        
-    if checked == ['Clara']:
-        df_radar = pd.DataFrame([features_mean_clara.tolist() + ["Clara"]], columns=cols)
-
+    if checked is None or checked == []:
+        df_radar = pd.DataFrame(
+            [features_mean_clara.tolist() + ["Clara"]], columns=cols)
     else:
-        df_radar = pd.DataFrame(data=[], columns=features+ ["name"])
+        df_radar = pd.DataFrame(data=[], columns=features + ["name"])
         for name in checked:
             tmp_row = dict_df[name][features].mean().values.tolist() + [name]
-            tmp_df = pd.DataFrame([tmp_row], columns= cols)
+            tmp_df = pd.DataFrame([tmp_row], columns=cols)
             df_radar = pd.concat([df_radar, tmp_df], ignore_index=True)
 
     return radarPlot(df_radar)
 
 
-
-
 # -------- Time Plot ----------------------------
 
 def timelineTracks(nested_list_col_tracks, nested_list_col_time, nested_list_artist, names):
-    df_timeline = pd.DataFrame({'col_time': [], 'col_tracks': [], 'artist': [], 'dummy': [], 'Account': []})
+    df_timeline = pd.DataFrame(
+        {'col_time': [], 'col_tracks': [], 'artist': [], 'dummy': [], 'Account': []})
     for i in range(len(nested_list_artist)):
         artist = nested_list_artist[i]
         col_time = nested_list_col_time[i]
         col_tracks = nested_list_col_tracks[i]
-        df_temp = pd.DataFrame({'col_time': col_time, 'col_tracks': col_tracks, 'artist': artist, 'dummy': [i for k in artist], 'Account':[names[i] for k in artist]})
-        df_timeline = pd.concat([df_timeline, df_temp], axis = 0)
+        df_temp = pd.DataFrame({'col_time': col_time, 'col_tracks': col_tracks, 'artist': artist, 'dummy': [
+                               i for k in artist], 'Account': [names[i] for k in artist]})
+        df_timeline = pd.concat([df_timeline, df_temp], axis=0)
 
-    fig = px.scatter(df_timeline, x='col_time', y='dummy', color = 'Account',
+    fig = px.scatter(df_timeline, x='col_time', y='dummy', color='Account',
                      # title="Time Line of the last Songs you've listened to",
                      # hover_name='col_tracks' + ' - ' + 'artist',
-                     hover_data={'col_time': False, 'col_tracks': False, 'artist': False},
+                     hover_data={'col_time': False,
+                                 'col_tracks': False, 'artist': False},
                      color_discrete_sequence=name_colors[0:len(names)])
 
-    if nested_list_col_tracks != []:
-        fig.update_traces(marker=dict(size=15, opacity=0.6),
-                        hovertemplate='<b>%{text}</b><br><br>%{x}',
-                        text=df_timeline['col_tracks'] + " - " + df_timeline['artist']
-                        )
-    
+    fig.update_traces(marker=dict(size=15, opacity=0.6),
+                      hovertemplate='<b>%{text}</b><br><br>%{x}',
+                      text=df_timeline['col_tracks'] +
+                      " - " + df_timeline['artist']
+                      # + " - " + df_timeline['artist']
+                      )
+
     for i in df_timeline['dummy'].unique():
         fig.add_hline(y=i, line_color=name_colors[int(i)])
 
@@ -191,7 +208,7 @@ def timelineTracks(nested_list_col_tracks, nested_list_col_time, nested_list_art
         ),
         yaxis=dict(visible=False),
         title_font=dict(color='white'),
-        font_color = 'white',
+        font_color='white',
 
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',  # this makes the background transparent
@@ -218,8 +235,9 @@ def update_timeline_graph(checked):
             trackName.append(df_temp['song_Name'])
             artist.append(df_temp["artist"])
             timestamp_temp = df_temp["TIME_STAMP"]
-            timestamp_temp = pd.to_datetime(timestamp_temp, format='mixed')
-            timestamp_temp = timestamp_temp + timedelta(hours=2)   # adding 2 hours because the time is not right
+            timestamp_temp = pd.to_datetime(timestamp_temp)
+            # adding 2 hours because the time is not right
+            timestamp_temp = timestamp_temp + timedelta(hours=2)
             timeStamp.append(timestamp_temp)
         return timelineTracks(trackName, timeStamp, artist, names)
 
@@ -233,7 +251,7 @@ def update_timeline_graph(checked):
 def update_song_info(click_data):
     if click_data is not None:
         relevant = click_data['points'][0]['customdata']
-        #point_index = click_data['points'][0]['pointIndex']
+        # point_index = click_data['points'][0]['pointIndex']
         track_info = str(relevant[0]) + \
             " by " + str(relevant[1])
 
@@ -246,10 +264,10 @@ def update_song_info(click_data):
     else:
         return html.Div([
             html.Div(id='song-box', className='neonText',
-                    children='Song Information'),
+                     children='Song Information'),
             html.Div(id='selected-song', className='neonText',
-                    children="Please select a Song in\nthe Time Line")
-    ])
+                     children="Please select a Song in\nthe Time Line")
+        ])
 
 
 # -------- table scores ----------------------------
@@ -260,21 +278,21 @@ def update_song_info(click_data):
 )
 def update_user_scores(checked):
 
-    if checked == ['Clara']:    # default 
-        df_tmp=pd.DataFrame({'features': features, 'Clara': features_mean_clara})
-        bbscores=[BBscore]
+    if checked == ['Clara']:    # default
+        df_tmp = pd.DataFrame(
+            {'features': features, 'Clara': features_mean_clara})
+        bbscores = [BBscore]
 
     else:
-        df_tmp=pd.DataFrame({'features': features})
-        bbscores=[]
+        df_tmp = pd.DataFrame({'features': features})
+        bbscores = []
 
         for name in checked:
             df_tmp_full = dict_df[name]
-            pop_tmp = np.round(df_tmp_full['popularity'].mean(),2)
+            pop_tmp = np.round(df_tmp_full['popularity'].mean(), 2)
             bbscores = [] + [pop_tmp]
-            feat_tmp = np.round(df_tmp_full[features].mean().values,2)
-            df_tmp[name]= feat_tmp
-
+            feat_tmp = np.round(df_tmp_full[features].mean().values, 2)
+            df_tmp[name] = feat_tmp
 
     strBB = ""
     for score in bbscores:
@@ -288,7 +306,7 @@ def update_user_scores(checked):
     return html.Div([
         html.Div(id='table-scores', className='neonBox', children=[
             html.Div(id='bbScore', className='neonText',
-                    children="BB score: " + strBB),
+                     children="BB score: " + strBB),
             dash_table.DataTable(
                 id='feature-table',
                 columns=[{'name': col, 'id': col} for col in df_tmp.columns],
@@ -299,19 +317,18 @@ def update_user_scores(checked):
                     'backgroundColor': 'rgba(0,0,0,0)',
                     'color': 'white',
                     'padding': '6px',
-                    'fontSize': '12px'  
+                    'fontSize': '12px'
                 },
                 style_header={
                     'backgroundColor': 'rgba(0,0,0,0)',
                     'fontWeight': 'bold',
                     'color': 'white',
                     'padding': '6px',
-                    'fontSize': '12px' 
+                    'fontSize': '12px'
                 }
-            )    
-            ])
+            )
         ])
-
+    ])
 
 
 if __name__ == '__main__':
