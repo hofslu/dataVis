@@ -11,7 +11,8 @@ import plotly.express as px
 import os
 from datetime import datetime, timedelta
 import numpy as np
-import dash_table
+from dash import dash_table
+from dash_table.Format import Group
 
 from scripts.utils import get_df
 
@@ -137,7 +138,11 @@ def radarPlot(df_radar_input):
 def update_spyder_graph(checked):
     cols = features+["name"]
     if checked is None or checked == []: 
+        df_radar = pd.DataFrame(data=[], columns=features+ ["name"])
+        
+    if checked == ['Clara']:
         df_radar = pd.DataFrame([features_mean_clara.tolist() + ["Clara"]], columns=cols)
+
     else:
         df_radar = pd.DataFrame(data=[], columns=features+ ["name"])
         for name in checked:
@@ -167,11 +172,11 @@ def timelineTracks(nested_list_col_tracks, nested_list_col_time, nested_list_art
                      hover_data={'col_time': False, 'col_tracks': False, 'artist': False},
                      color_discrete_sequence=name_colors[0:len(names)])
 
-    fig.update_traces(marker=dict(size=15, opacity=0.6),
-                      hovertemplate='<b>%{text}</b><br><br>%{x}',
-                      text=df_timeline['col_tracks'] + " - " + df_timeline['artist']
-                      # + " - " + df_timeline['artist']
-                      )
+    if nested_list_col_tracks != []:
+        fig.update_traces(marker=dict(size=15, opacity=0.6),
+                        hovertemplate='<b>%{text}</b><br><br>%{x}',
+                        text=df_timeline['col_tracks'] + " - " + df_timeline['artist']
+                        )
     
     for i in df_timeline['dummy'].unique():
         fig.add_hline(y=i, line_color=name_colors[int(i)])
@@ -230,7 +235,7 @@ def update_song_info(click_data):
         relevant = click_data['points'][0]['customdata']
         #point_index = click_data['points'][0]['pointIndex']
         track_info = str(relevant[0]) + \
-            "by " + str(relevant[1])
+            " by " + str(relevant[1])
 
         return html.Div([
             html.Div(id='song-box', className='neonText',
@@ -254,7 +259,6 @@ def update_song_info(click_data):
     Input('checklist', 'value')
 )
 def update_user_scores(checked):
-    print(checked)
 
     if checked == ['Clara']:    # default 
         df_tmp=pd.DataFrame({'features': features, 'Clara': features_mean_clara})
@@ -276,6 +280,10 @@ def update_user_scores(checked):
     for score in bbscores:
         strBB = strBB + str(score) + ", "
 
+    dash_table.DataTable(
+        data=df_tmp.to_dict('records'),
+        columns=[{"name": col, "id": col} for col in df_tmp.columns]
+    )
 
     return html.Div([
         html.Div(id='table-scores', className='neonBox', children=[
