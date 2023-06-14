@@ -28,23 +28,25 @@ name_colors = ['limegreen', 'darkturquoise', 'deeppink']
 LUKAS_CLIENT_ID = "207e1c72689d4a0a88e0e721cb9bb254"
 LUKAS_CLIENT_SECRET = "829b022bc7cc4559bde70a7dc57a4317"
 
-CLARA_CLIENT_ID = "b8db48d0784f4e2b9ab719adc118e918"
-CLARA_CLIENT_SECRET = "0a7feca73df44f1c829f125dbe8a6b91"
+CLARA_CLIENT_ID = "58b1a904e6d447f28c57ce10c8b8880c"
+CLARA_CLIENT_SECRET = "6e2d14807777498fba48d13dd557aaeb"
 
 # df = get_df(CLARA_CLIENT_ID, CLARA_CLIENT_SECRET)
 
 # df_clara = pd.read_csv("./data/claras_songs.csv")
 # df_lukas = pd.read_csv("./data/claras_songs.csv")
+
 df_clara = get_df(CLARA_CLIENT_ID, CLARA_CLIENT_SECRET, 'clara')
 df_lukas = get_df(LUKAS_CLIENT_ID, LUKAS_CLIENT_SECRET, 'lukas')
-df_johannes = pd.read_csv("./data/claras_songs.csv")
+# df_lukas = pd.read_csv("/Users/clarapichler/Desktop/SS 2023/Informationsvisualisierung/dataVis/theAPP_copy/data/claras_songs.csv")
+df_johannes = pd.read_csv("./data/claras_full_frame.csv")
 dict_df = {'Clara': df_clara, 'Lukas': df_lukas, 'Johannes': df_johannes}
-df = df_lukas
+df = df_clara
 
 timeStamp = df["TIME_STAMP"]
 print(timeStamp[0])
 print(type(timeStamp[0]))
-timeStamp = pd.to_datetime(timeStamp)
+timeStamp = pd.to_datetime(timeStamp, format='mixed')
 # adding 2 hours because the time is not right
 timeStamp = timeStamp + timedelta(hours=2)
 
@@ -105,10 +107,14 @@ def radarPlot(df_radar_input):
                                df_radar_input.loc[i, "name"] for _ in values]})
         df_radarplot = pd.concat([df_radarplot, df_temp], ignore_index=True)
 
+    name_colors_radar = name_colors[:len(df_radar_input["name"])]
+    if len(df_radar_input) == 0:
+        df_radarplot = pd.DataFrame({'subjects': features, 'values': [0,0,0,0,0,0], 'Account': np.full(6, "None")})
+        name_colors_radar = ["rgba(0,0,0,0)"]
+
     fig = px.line_polar(df_radarplot, r='values', theta='subjects', color='Account',
-                        # line_close=True, THIS BITCH GAVE ME AN ERROR I WAS LOOKING EVERYWHERE FOR
-                        color_discrete_sequence=name_colors[:len(
-                            df_radar_input["name"])]
+                        line_close=True, # THIS BITCH GAVE ME AN ERROR I WAS LOOKING EVERYWHERE FOR
+                        color_discrete_sequence=name_colors_radar
                         )
 
     fig.update_traces(fill="toself")
@@ -144,8 +150,8 @@ def radarPlot(df_radar_input):
 def update_spyder_graph(checked):
     cols = features+["name"]
     if checked is None or checked == []:
-        df_radar = pd.DataFrame(
-            [features_mean_clara.tolist() + ["Clara"]], columns=cols)
+        df_radar=pd.DataFrame([], columns=cols)
+
     else:
         df_radar = pd.DataFrame(data=[], columns=features + ["name"])
         for name in checked:
@@ -173,15 +179,16 @@ def timelineTracks(nested_list_col_tracks, nested_list_col_time, nested_list_art
                      # title="Time Line of the last Songs you've listened to",
                      # hover_name='col_tracks' + ' - ' + 'artist',
                      hover_data={'col_time': False,
-                                 'col_tracks': False, 'artist': False},
+                                 'col_tracks': False, 'artist': False, 'dummy': False},
                      color_discrete_sequence=name_colors[0:len(names)])
-
-    fig.update_traces(marker=dict(size=15, opacity=0.6),
-                      hovertemplate='<b>%{text}</b><br><br>%{x}',
-                      text=df_timeline['col_tracks'] +
-                      " - " + df_timeline['artist']
-                      # + " - " + df_timeline['artist']
-                      )
+    
+    if nested_list_col_tracks != []:
+        fig.update_traces(marker=dict(size=15, opacity=0.6),
+                        hovertemplate='<b>%{text}</b><br><br>%{x}',
+                        text=df_timeline['col_tracks'] +
+                        " - " + df_timeline['artist']
+                        # + " - " + df_timeline['artist']
+                        )
 
     for i in df_timeline['dummy'].unique():
         fig.add_hline(y=i, line_color=name_colors[int(i)])
@@ -210,6 +217,7 @@ def timelineTracks(nested_list_col_tracks, nested_list_col_time, nested_list_art
     Input('checklist', 'value')
 )
 def update_timeline_graph(checked):
+    print(checked)
     if checked is None or checked == []:
         return timelineTracks([], [], [], [])
     else:
@@ -223,10 +231,11 @@ def update_timeline_graph(checked):
             trackName.append(df_temp['song_Name'])
             artist.append(df_temp["artist"])
             timestamp_temp = df_temp["TIME_STAMP"]
-            timestamp_temp = pd.to_datetime(timestamp_temp)
+            timestamp_temp = pd.to_datetime(timestamp_temp, format='mixed')
             # adding 2 hours because the time is not right
             timestamp_temp = timestamp_temp + timedelta(hours=2)
             timeStamp.append(timestamp_temp)
+        
         return timelineTracks(trackName, timeStamp, artist, names)
 
 
@@ -237,12 +246,12 @@ def update_timeline_graph(checked):
     Input('timeline-graph', 'clickData')
 )
 def update_song_info(click_data):
+    print(click_data)
     if click_data is not None:
-        relevant = click_data['points'][0]['customdata']
+        relevant = click_data['points'][0]['text']
         print(relevant)
         # point_index = click_data['points'][0]['pointIndex']
-        track_info = str(relevant[0]) + \
-            " by " + str(relevant[1])
+        track_info = relevant
 
         return html.Div([
             html.Div(id='song-box', className='neonText',
@@ -280,7 +289,7 @@ def update_user_scores(checked):
         for name in checked:
             df_tmp_full = dict_df[name]
             pop_tmp = np.round(df_tmp_full['popularity'].mean(), 2)
-            bbscores = [] + [pop_tmp]
+            bbscores = bbscores + [pop_tmp]
             feat_tmp = np.round(df_tmp_full[features].mean().values, 2)
             df_tmp[name] = feat_tmp
 
@@ -290,7 +299,7 @@ def update_user_scores(checked):
 
     return [
         html.Div(id='bbScore', className='neonText',
-                 children="BB score: " + strBB),
+                 children="BB score: \n" + strBB),
         dash_table.DataTable(
             id='feature-table',
             columns=[{'name': col, 'id': col} for col in df_tmp.columns],
@@ -315,4 +324,4 @@ def update_user_scores(checked):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
