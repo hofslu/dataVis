@@ -25,19 +25,21 @@ lightblackSpotify = 'rgb(41, 40, 40)'
 name_colors = ['limegreen', 'darkturquoise', 'deeppink']
 
 
-# LUKAS_CLIENT_ID = "207e1c72689d4a0a88e0e721cb9bb254"
-# LUKAS_CLIENT_SECRET = "2b98d70fb10b4ca1b0008405a353d35c"
+LUKAS_CLIENT_ID = "207e1c72689d4a0a88e0e721cb9bb254"
+LUKAS_CLIENT_SECRET = "829b022bc7cc4559bde70a7dc57a4317"
 
-# CLARA_CLIENT_ID = "b8db48d0784f4e2b9ab719adc118e918"
-# CLARA_CLIENT_SECRET = "0a7feca73df44f1c829f125dbe8a6b91"
+CLARA_CLIENT_ID = "b8db48d0784f4e2b9ab719adc118e918"
+CLARA_CLIENT_SECRET = "0a7feca73df44f1c829f125dbe8a6b91"
 
 # df = get_df(CLARA_CLIENT_ID, CLARA_CLIENT_SECRET)
 
-df_clara = pd.read_csv("./data/claras_songs.csv")
-df_lukas = pd.read_csv("./data/claras_songs.csv")
+# df_clara = pd.read_csv("./data/claras_songs.csv")
+# df_lukas = pd.read_csv("./data/claras_songs.csv")
+df_clara = get_df(CLARA_CLIENT_ID, CLARA_CLIENT_SECRET, 'clara')
+df_lukas = get_df(LUKAS_CLIENT_ID, LUKAS_CLIENT_SECRET, 'lukas')
 df_johannes = pd.read_csv("./data/claras_songs.csv")
 dict_df = {'Clara': df_clara, 'Lukas': df_lukas, 'Johannes': df_johannes}
-df = df_clara
+df = df_lukas
 
 timeStamp = df["TIME_STAMP"]
 print(timeStamp[0])
@@ -57,33 +59,18 @@ features_mean_clara = np.round(df[features].mean().values, 2)
 app = dash.Dash(__name__, external_stylesheets=['../static/css/test2.css'])
 
 app.layout = html.Div([
-    # Header
-    # html.Div(id='header', className='neonBox', children=[
-    #     html.Div(id='title', className='neonText',
-    #             children='Spotify User Dashboard'),
-    #     html.Img(src=app.get_asset_url('spotify-icon.png'))
-    # ]),
     # User Info
     html.Div(id='user-info', className='neonBox', children=[
         html.Div(id='user', className='neonText',
                  children='Spotify User Data'),
-        # html.Div(className='neonText', children='Basic bitch score:'),
-        # html.Div(id='bbScore', className='neonText', children=BBscore),
+        # User selection
         dcc.Checklist(
             ['Clara', 'Lukas', 'Johannes'],
-            # options=[
-            #     {'label': html.Label(
-            #         'Clara', className=''), 'value': 'Clara'},
-            #     {'label': html.Label(
-            #         'Lukas', className=''), 'value': 'Lukas'},
-            #     {'label': html.Label(
-            #         'Johannes', className=''), 'value': 'Johannes'}
-            # ],
+
             value=['Clara'],
             id='checklist',
             inputClassName='checkboxDash'
         ),
-
         # User scores
         html.Div(id='table-scores', className=''
                  ),
@@ -135,7 +122,8 @@ def radarPlot(df_radar_input):
         polar=dict(
             radialaxis=dict(
                 tickfont=dict(color='white'),
-                tickvals=[0, 0.2, 0.4, 0.6, 0.8]
+                range=[0, 1],
+                tickvals=[0, 0.2, 0.4, 0.6, 0.8, 1],
             ),
             angularaxis=dict(
                 tickfont=dict(color='white')
@@ -251,6 +239,7 @@ def update_timeline_graph(checked):
 def update_song_info(click_data):
     if click_data is not None:
         relevant = click_data['points'][0]['customdata']
+        print(relevant)
         # point_index = click_data['points'][0]['pointIndex']
         track_info = str(relevant[0]) + \
             " by " + str(relevant[1])
@@ -277,6 +266,7 @@ def update_song_info(click_data):
     Input('checklist', 'value')
 )
 def update_user_scores(checked):
+    print(checked)
 
     if checked == ['Clara']:    # default
         df_tmp = pd.DataFrame(
@@ -298,38 +288,31 @@ def update_user_scores(checked):
     for score in bbscores:
         strBB = strBB + str(score) + ", "
 
-    dash_table.DataTable(
-        data=df_tmp.to_dict('records'),
-        columns=[{"name": col, "id": col} for col in df_tmp.columns]
-    )
-
-    return html.Div([
-        html.Div(id='table-scores', className='neonBox', children=[
-            html.Div(id='bbScore', className='neonText',
-                     children="BB score: " + strBB),
-            dash_table.DataTable(
-                id='feature-table',
-                columns=[{'name': col, 'id': col} for col in df_tmp.columns],
-                data=df_tmp.to_dict('records'),
-                style_table={'width': '100%'},
-                style_cell={
-                    'textAlign': 'left',
-                    'backgroundColor': 'rgba(0,0,0,0)',
-                    'color': 'white',
-                    'padding': '6px',
-                    'fontSize': '12px'
-                },
-                style_header={
-                    'backgroundColor': 'rgba(0,0,0,0)',
-                    'fontWeight': 'bold',
-                    'color': 'white',
-                    'padding': '6px',
-                    'fontSize': '12px'
-                }
-            )
-        ])
-    ])
+    return [
+        html.Div(id='bbScore', className='neonText',
+                 children="BB score: " + strBB),
+        dash_table.DataTable(
+            id='feature-table',
+            columns=[{'name': col, 'id': col} for col in df_tmp.columns],
+            data=df_tmp.to_dict('records'),
+            style_table={'width': '100%'},
+            style_cell={
+                'textAlign': 'left',
+                'backgroundColor': 'rgba(0,0,0,0)',
+                'color': 'white',
+                'padding': '6px',
+                'fontSize': '12px'
+            },
+            style_header={
+                'backgroundColor': 'rgba(0,0,0,0)',
+                'fontWeight': 'bold',
+                'color': 'white',
+                'padding': '6px',
+                'fontSize': '12px'
+            }
+        )
+    ]
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
