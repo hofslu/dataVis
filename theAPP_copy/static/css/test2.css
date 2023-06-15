@@ -83,10 +83,11 @@ body {
 #song-info {
     position: absolute;
     left: 23vw;
-    top: 12vh;
+    /*top: 12vh;*/
+    bottom: 35vh;
 
     width: 28vw;
-    height: 50vh;
+    height: 62vh;
 
     background-color: rgba(0, 0, 0, 0);
     box-shadow: none;
@@ -95,7 +96,8 @@ body {
 #spider-chart {
     position: absolute;
     right: 2vw;
-    top: 10vh;
+    /*top: 10vh;*/
+    bottom: 35vh;
 
     /*transform: translate(-10%, 0);*/
     width: 50vw;
@@ -106,9 +108,10 @@ body {
 
 }
 
-/* #spyder-graph {
+/*#spyder-graph {
     height: 160%;
-}  */
+    bottom: 35vh;
+}*/
 
 #timeline {
     position: absolute;
