@@ -121,7 +121,7 @@ app.layout = html.Div([
     html.Div(id='timeline', className='neonBox', children=[
         html.Div(id='title_timeline', className='neonText',
                  children='Time Line of the last 50 recently played Songs'),
-        dcc.Graph(figure={}, id='timeline-graph'),
+        dcc.Graph(figure={}, id='timeline-graph',clear_on_unhover=True),
         dcc.Tooltip(id='timeline-tooltip')
     ])
 ])
