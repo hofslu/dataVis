@@ -24,7 +24,6 @@ lightblackSpotify = 'rgb(41, 40, 40)'
 # name colors
 name_colors = ['limegreen', 'darkturquoise', 'deeppink']
 
-
 LUKAS_CLIENT_ID = "207e1c72689d4a0a88e0e721cb9bb254"
 LUKAS_CLIENT_SECRET = "829b022bc7cc4559bde70a7dc57a4317"
 
@@ -34,21 +33,45 @@ CLARA_CLIENT_SECRET = "6e2d14807777498fba48d13dd557aaeb"
 JOHANNES_CLIENT_ID = 'ef739fe8683f4dada353b4260519e694'
 JOHANNES_CLIENT_SECRET = '5076481d53f24b1384fc79754f35a82c'
 
+# Define the relative and absolute file paths
+relative_path_clara = "./data/claras_songs.csv"
+absolute_path_clara = "/home/johannes/Dokumente/tu/info_vis/dataVis/theAPP_copy/data/claras_songs.csv"
 
-# df = get_df(CLARA_CLIENT_ID, CLARA_CLIENT_SECRET)
+relative_path_lukas = "./data/lukas_songs.csv"
+absolute_path_lukas = "/home/johannes/Dokumente/tu/info_vis/dataVis/theAPP_copy/data/lukas_songs.csv"
+
+relative_path_johannes = "./data/johannes_songs.csv"
+absolute_path_johannes = "/home/johannes/Dokumente/tu/info_vis/dataVis/theAPP_copy/data/johannes_songs.csv"
 
 try:
     df_clara = get_df(CLARA_CLIENT_ID, CLARA_CLIENT_SECRET, 'clara')
+    df_clara.to_csv(relative_path_clara)
+    print("CLARA READ")
     df_lukas = get_df(LUKAS_CLIENT_ID, LUKAS_CLIENT_SECRET, 'lukas')
-    df_johannes = get_df(JOHANNES_CLIENT_ID, JOHANNES_CLIENT_SECRET, 'johannes')
-    df_clara.to_csv('./data/claras_songs.csv')
-    df_lukas.to_csv('./data/lukas_songs.csv')
-    df_johannes.to_csv('./data/johannes_songs.csv')
+    df_lukas.to_csv(relative_path_lukas)
+    print("LUKAS READ")
+    df_johannes = get_df(JOHANNES_CLIENT_ID,
+                         JOHANNES_CLIENT_SECRET, 'johannes')
+    df_johannes.to_csv(relative_path_johannes)
+    print("JOHANNES READ")
 except:
-    df_clara = pd.read_csv("/home/johannes/Dokumente/tu/info_vis/dataVis/theAPP_copy/data/claras_songs.csv")
-    df_lukas = pd.read_csv("/home/johannes/Dokumente/tu/info_vis/dataVis/theAPP_copy/data/claras_songs.csv")
-    df_johannes = pd.read_csv("/home/johannes/Dokumente/tu/info_vis/dataVis/theAPP_copy/data/claras_songs.csv")
-    
+    print("DATA READ FROM FALLBACK .csv")
+
+    # Create a function to read the CSV files
+    def read_csv_file(relative_path, absolute_path):
+        if os.path.exists(relative_path):
+            return pd.read_csv(relative_path)
+        elif os.path.exists(absolute_path):
+            return pd.read_csv(absolute_path)
+        else:
+            print("No valid path given.")
+            return None
+
+    # Use the function to read the CSV files
+    df_clara = read_csv_file(relative_path_clara, absolute_path_clara)
+    df_lukas = read_csv_file(relative_path_lukas, absolute_path_lukas)
+    df_johannes = read_csv_file(relative_path_johannes, absolute_path_johannes)
+
 
 dict_df = {'Clara': df_clara, 'Lukas': df_lukas, 'Johannes': df_johannes}
 
@@ -58,7 +81,7 @@ features = ["danceability", "energy", "speechiness",
 
 
 # building the app
-app = dash.Dash(__name__, external_stylesheets=['../static/css/test2.css'])
+app = dash.Dash(__name__, external_stylesheets=['../static/css/styles.css'])
 
 app.layout = html.Div([
     # User Info
@@ -83,8 +106,8 @@ app.layout = html.Div([
 
     ]),
     # Song Info
-    html.Div(id='song-info', className='neonBox', children = [
-        dcc.Graph(figure = {}, id = 'song-graph')
+    html.Div(id='song-info', className='neonBox', children=[
+        dcc.Graph(figure={}, id='song-graph')
     ]),
 
     # Time Line
@@ -110,11 +133,12 @@ def radarPlot(df_radar_input):
 
     name_colors_radar = name_colors[:len(df_radar_input["name"])]
     if len(df_radar_input) == 0:
-        df_radarplot = pd.DataFrame({'subjects': features, 'values': [0,0,0,0,0,0], 'Account': np.full(6, "None")})
+        df_radarplot = pd.DataFrame({'subjects': features, 'values': [
+                                    0, 0, 0, 0, 0, 0], 'Account': np.full(6, "None")})
         name_colors_radar = ["rgba(0,0,0,0)"]
 
     fig = px.line_polar(df_radarplot, r='values', theta='subjects', color='Account',
-                        line_close=True, # THIS BITCH GAVE ME AN ERROR I WAS LOOKING EVERYWHERE FOR
+                        line_close=True,  # THIS BITCH GAVE ME AN ERROR I WAS LOOKING EVERYWHERE FOR
                         color_discrete_sequence=name_colors_radar
                         )
 
@@ -151,7 +175,7 @@ def radarPlot(df_radar_input):
 def update_spyder_graph(checked):
     cols = features+["name"]
     if checked is None or checked == []:
-        df_radar=pd.DataFrame([], columns=cols)
+        df_radar = pd.DataFrame([], columns=cols)
 
     else:
         df_radar = pd.DataFrame(data=[], columns=features + ["name"])
@@ -182,14 +206,14 @@ def timelineTracks(nested_list_col_tracks, nested_list_col_time, nested_list_art
                      hover_data={'col_time': False,
                                  'col_tracks': False, 'artist': False, 'dummy': False},
                      color_discrete_sequence=name_colors[0:len(names)])
-    
+
     if nested_list_col_tracks != []:
         fig.update_traces(marker=dict(size=15, opacity=0.6),
-                        hovertemplate='<b>%{text}</b><br><br>%{x}',
-                        text=df_timeline['col_tracks'] +
-                        " - " + df_timeline['artist']
-                        # + " - " + df_timeline['artist']
-                        )
+                          hovertemplate='<b>%{text}</b><br><br>%{x}',
+                          text=df_timeline['col_tracks'] +
+                          " - " + df_timeline['artist']
+                          # + " - " + df_timeline['artist']
+                          )
 
     for i in df_timeline['dummy'].unique():
         fig.add_hline(y=i, line_color=name_colors[int(i)])
@@ -236,17 +260,17 @@ def update_timeline_graph(checked):
             # adding 2 hours because the time is not right
             timestamp_temp = timestamp_temp + timedelta(hours=2)
             timeStamp.append(timestamp_temp)
-        
+
         return timelineTracks(trackName, timeStamp, artist, names)
 
 
 # # -------- Song Info ----------------------------
 
 def radarPlot2(input):
-    data = pd.DataFrame({'subjects' : features,
-                          'values': input})
+    data = pd.DataFrame({'subjects': features,
+                         'values': input})
     fig = px.line_polar(data, r='values', theta='subjects',
-                        line_close=True, # THIS BITCH GAVE ME AN ERROR I WAS LOOKING EVERYWHERE FOR
+                        line_close=True,  # THIS BITCH GAVE ME AN ERROR I WAS LOOKING EVERYWHERE FOR
                         color_discrete_sequence=[name_colors[0]]
                         )
     fig.update_traces(fill="toself")
@@ -274,6 +298,7 @@ def radarPlot2(input):
 
     return fig
 
+
 @app.callback(
     Output('song-info', 'children'),
     Input('timeline-graph', 'clickData')
@@ -282,13 +307,14 @@ def update_song_info(click_data):
     print(click_data)
     if click_data is not None:
         relevant = click_data['points'][0]['text']
-        #print(relevant)
+        # print(relevant)
         # point_index = click_data['points'][0]['pointIndex']
         track_info = relevant
         song, artist = click_data['points'][0]['customdata']
         for name in dict_df.keys():
             df = dict_df[name]
-            tmp = df.loc[(df['artist'] == artist) & (df['song_Name'] == song), features]
+            tmp = df.loc[(df['artist'] == artist) & (
+                df['song_Name'] == song), features]
             if len(tmp) > 0:
                 break
         data = tmp.iloc[0].to_list()
@@ -299,7 +325,7 @@ def update_song_info(click_data):
                      children='Song Information'),
             html.Div(id='selected-song', className='neonText',
                      children=track_info),
-            dcc.Graph(figure = fig, id = 'song-graph')
+            dcc.Graph(figure=fig, id='song-graph')
         ])
     else:
         return html.Div([
@@ -308,17 +334,18 @@ def update_song_info(click_data):
             html.Div(id='selected-song', className='neonText',
                      children="Please select a Song in\nthe Time Line")
         ])
-    
-#--------- song bar plor ---------------------------
+
+# --------- song bar plor ---------------------------
 
 # -------- table scores ----------------------------
+
 
 @callback(
     Output(component_id='table-scores', component_property='children'),
     Input('checklist', 'value')
 )
 def update_user_scores(checked):
-    #print(checked)
+    # print(checked)
     df_tmp = pd.DataFrame({'features': features})
     bbscores = []
 

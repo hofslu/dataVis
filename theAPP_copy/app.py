@@ -45,16 +45,16 @@ relative_path_johannes = "./data/johannes_songs.csv"
 absolute_path_johannes = "/home/johannes/Dokumente/tu/info_vis/dataVis/theAPP_copy/data/johannes_songs.csv"
 
 try:
-    # df_clara = get_df(CLARA_CLIENT_ID, CLARA_CLIENT_SECRET, 'clara')
-    # df_clara.to_csv(relative_path_clara)
+    df_clara = get_df(CLARA_CLIENT_ID, CLARA_CLIENT_SECRET, 'clara')
+    df_clara.to_csv(relative_path_clara)
     print("CLARA READ")
     df_lukas = get_df(LUKAS_CLIENT_ID, LUKAS_CLIENT_SECRET, 'lukas')
     df_lukas.to_csv(relative_path_lukas)
     print("LUKAS READ")
-    df_johannes = get_df(JOHANNES_CLIENT_ID,
-                         JOHANNES_CLIENT_SECRET, 'johannes')
+    # df_johannes = get_df(JOHANNES_CLIENT_ID,
+    #                      JOHANNES_CLIENT_SECRET, 'johannes')
+    # df_johannes.to_csv(relative_path_johannes)
     print("JOHANNES READ")
-    df_johannes.to_csv(relative_path_johannes)
 except:
     print("DATA READ FROM FALLBACK .csv")
 
