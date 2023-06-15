@@ -115,7 +115,7 @@ body {
 
 #song-graph {
     position: absolute;
-    bottom: 50px;
+    bottom: 14vh;
     left: 40%;
     transform: translateX(-50%);
     height: 350px;

@@ -11,7 +11,7 @@ import plotly.express as px
 import os
 from datetime import datetime, timedelta
 import numpy as np
-from dash import dash_table
+from dash import dash_table, no_update
 from dash_table.Format import Group
 
 from scripts.utils import get_df
@@ -86,7 +86,7 @@ app = dash.Dash(__name__, external_stylesheets=['../static/css/styles.css'])
 app.layout = html.Div([
     html.Div([
         # Spotify Logo
-        html.Div("Spotify user analysis", id='title'),
+        html.Div("Spotify User Analysis", id='title'),
         html.Img(src='./static/spotify-icon.png',
                  id='spotify-logo', height='60px', width='60px'),
     ], id='header', style={'display': 'flex', 'align-items': 'center'}),
@@ -121,7 +121,8 @@ app.layout = html.Div([
     html.Div(id='timeline', className='neonBox', children=[
         html.Div(id='title_timeline', className='neonText',
                  children='Time Line of the last 50 recently played Songs'),
-        dcc.Graph(figure={}, id='timeline-graph')
+        dcc.Graph(figure={}, id='timeline-graph'),
+        dcc.Tooltip(id='timeline-tooltip')
     ])
 ])
 
@@ -210,17 +211,22 @@ def timelineTracks(nested_list_col_tracks, nested_list_col_time, nested_list_art
     fig = px.scatter(df_timeline, x='col_time', y='dummy', color='Account',
                      # title="Time Line of the last Songs you've listened to",
                      # hover_name='col_tracks' + ' - ' + 'artist',
-                     hover_data={'col_time': False,
-                                 'col_tracks': False, 'artist': False, 'dummy': False},
-                     color_discrete_sequence=name_colors[0:len(names)])
-
-    if nested_list_col_tracks != []:
-        fig.update_traces(marker=dict(size=15, opacity=0.6),
-                          hovertemplate='<b>%{text}</b><br><br>%{x}',
-                          text=df_timeline['col_tracks'] +
-                          " - " + df_timeline['artist']
-                          # + " - " + df_timeline['artist']
-                          )
+                     #hover_data={'col_time': False,
+                      #           'col_tracks': False,
+                       #          'artist': False,
+                        #         'dummy': False},
+                     color_discrete_sequence=name_colors[0:len(names)],
+                     custom_data=['col_tracks', 'artist'])
+    fig.update_traces(hoverinfo="none", 
+                      hovertemplate=None,
+                      marker=dict(size=15, opacity=0.6))
+    #if nested_list_col_tracks != []:
+     #   fig.update_traces(marker=dict(size=15, opacity=0.6),
+      #                    hovertemplate='<b>%{text}</b><br><br>%{x}',
+       #                   text=df_timeline['col_tracks'] +
+        #                  " - " + df_timeline['artist']
+         #                 # + " - " + df_timeline['artist']
+          #                )
 
     for i in df_timeline['dummy'].unique():
         fig.add_hline(y=i, line_color=name_colors[int(i)])
@@ -313,11 +319,11 @@ def radarPlot2(input):
 def update_song_info(click_data):
     print(click_data)
     if click_data is not None:
-        relevant = click_data['points'][0]['text']
+        #relevant = click_data['points'][0]['text']
         # print(relevant)
         # point_index = click_data['points'][0]['pointIndex']
-        track_info = relevant
         song, artist = click_data['points'][0]['customdata']
+        track_info = f"{song} by {artist}"
         for name in dict_df.keys():
             df = dict_df[name]
             tmp = df.loc[(df['artist'] == artist) & (
@@ -341,8 +347,6 @@ def update_song_info(click_data):
             html.Div(id='selected-song', className='neonText',
                      children="Please select a Song in\nthe Time Line")
         ])
-
-# --------- song bar plor ---------------------------
 
 # -------- table scores ----------------------------
 
@@ -395,6 +399,31 @@ def update_user_scores(checked):
             }
         )
     ]
+
+
+# -------- tooltip ----------------------------
+@callback(
+    Output("timeline-tooltip", "show"),
+    Output("timeline-tooltip", "bbox"),
+    Output("timeline-tooltip", "children"),
+    Input("timeline-graph", "hoverData")
+)
+def update_tooltip(hoverData):
+    if hoverData is None:
+        return False, no_update, no_update
+    else:
+        print(hoverData)
+        pt = hoverData['points'][0]
+        bbox = pt['bbox']
+        song, artist = pt['customdata']
+        time = pt['x']
+        children = [
+            html.P([html.B(f"{song} by {artist}"), html.Br(), html.Br(), f"{time}"], 
+                    style={'font-size': '11px',
+                          'height' : '30px',
+                          'background-color':'rgba(255,255,255,0.5)'})
+        ]
+        return True, bbox, children
 
 
 if __name__ == '__main__':
