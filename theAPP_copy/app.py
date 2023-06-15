@@ -24,7 +24,6 @@ lightblackSpotify = 'rgb(41, 40, 40)'
 # name colors
 name_colors = ['limegreen', 'darkturquoise', 'deeppink']
 
-
 LUKAS_CLIENT_ID = "207e1c72689d4a0a88e0e721cb9bb254"
 LUKAS_CLIENT_SECRET = "829b022bc7cc4559bde70a7dc57a4317"
 
@@ -51,9 +50,9 @@ try:
     df_lukas = get_df(LUKAS_CLIENT_ID, LUKAS_CLIENT_SECRET, 'lukas')
     df_lukas.to_csv(relative_path_lukas)
     print("LUKAS READ")
-    # df_johannes = get_df(JOHANNES_CLIENT_ID,
-    #                      JOHANNES_CLIENT_SECRET, 'johannes')
-    # df_johannes.to_csv(relative_path_johannes)
+    df_johannes = get_df(JOHANNES_CLIENT_ID,
+                         JOHANNES_CLIENT_SECRET, 'johannes')
+    df_johannes.to_csv(relative_path_johannes)
     print("JOHANNES READ")
 except:
     print("DATA READ FROM FALLBACK .csv")
@@ -75,37 +74,23 @@ except:
 
 
 dict_df = {'Clara': df_clara, 'Lukas': df_lukas, 'Johannes': df_johannes}
-df = df_clara
 
-timeStamp = df["TIME_STAMP"]
-print(timeStamp[0])
-print(type(timeStamp[0]))
-try:
-    timeStamp = pd.to_datetime(timeStamp, format='mixed')
-except Exception as e1:
-    print("Exception occurred: ", str(e1))
-    try:
-        timeStamp = pd.to_datetime(timeStamp)
-    except Exception as e2:
-        print("Exception occurred: ", str(e2))
-
-
-# adding 2 hours because the time is not right
-timeStamp = timeStamp + timedelta(hours=2)
-
-BBscore = str(np.round(df["popularity"].mean(), 2))
 
 features = ["danceability", "energy", "speechiness",
             "acousticness", "instrumentalness", "liveness"]
-features_mean_clara = np.round(df[features].mean().values, 2)
 
-# -------- Application Build ----------------------------
+
 # building the app
 app = dash.Dash(__name__, external_stylesheets=['../static/css/styles.css'])
 
 app.layout = html.Div([
-    # Spotify Logo
-    html.Img(src='../assets/spotify-icon.png', id='spotify-logo'),
+    html.Div([
+        # Spotify Logo
+        html.Div("Spotify user analysis", id='title'),
+        html.Img(src='./static/spotify-icon.png',
+                 id='spotify-logo', height='60px', width='60px'),
+    ], id='header', style={'display': 'flex', 'align-items': 'center'}),
+
     # User Info
     html.Div(id='user-info', className='neonBox', children=[
         html.Div(id='user', className='neonText',
@@ -128,8 +113,9 @@ app.layout = html.Div([
 
     ]),
     # Song Info
-    html.Div(id='song-info', className='neonBox'
-             ),
+    html.Div(id='song-info', className='neonBox', children=[
+        dcc.Graph(figure={}, id='song-graph')
+    ]),
 
     # Time Line
     html.Div(id='timeline', className='neonBox', children=[
@@ -159,7 +145,7 @@ def radarPlot(df_radar_input):
         name_colors_radar = ["rgba(0,0,0,0)"]
 
     fig = px.line_polar(df_radarplot, r='values', theta='subjects', color='Account',
-                        line_close=True,
+                        line_close=True,  # THIS BITCH GAVE ME AN ERROR I WAS LOOKING EVERYWHERE FOR
                         color_discrete_sequence=name_colors_radar
                         )
 
@@ -252,7 +238,7 @@ def timelineTracks(nested_list_col_tracks, nested_list_col_time, nested_list_art
         font_color='white',
 
         plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',  # this makes the background transparent
+        paper_bgcolor='rgba(0,0,0,0)',
     )
 
     return fig
@@ -266,7 +252,6 @@ def update_timeline_graph(checked):
     print(checked)
     if checked is None or checked == []:
         return timelineTracks([], [], [], [])
-
     else:
         trackName = []
         timeStamp = []
@@ -278,16 +263,7 @@ def update_timeline_graph(checked):
             trackName.append(df_temp['song_Name'])
             artist.append(df_temp["artist"])
             timestamp_temp = df_temp["TIME_STAMP"]
-
-            try:
-                timestamp_temp = pd.to_datetime(timestamp_temp, format='mixed')
-            except Exception as e1:
-                print("Exception occurred: ", str(e1))
-                try:
-                    timestamp_temp = pd.to_datetime(timestamp_temp)
-                except Exception as e2:
-                    print("Exception occurred: ", str(e2))
-
+            timestamp_temp = pd.to_datetime(timestamp_temp)
             # adding 2 hours because the time is not right
             timestamp_temp = timestamp_temp + timedelta(hours=2)
             timeStamp.append(timestamp_temp)
@@ -297,6 +273,39 @@ def update_timeline_graph(checked):
 
 # # -------- Song Info ----------------------------
 
+def radarPlot2(input):
+    data = pd.DataFrame({'subjects': features,
+                         'values': input})
+    fig = px.line_polar(data, r='values', theta='subjects',
+                        line_close=True,  # THIS BITCH GAVE ME AN ERROR I WAS LOOKING EVERYWHERE FOR
+                        color_discrete_sequence=[name_colors[0]]
+                        )
+    fig.update_traces(fill="toself")
+
+    fig.update_polars(bgcolor=blackSpotify)
+
+    fig.update_layout(
+        autosize=True,
+        height=None,
+        width=None,
+        polar=dict(
+            radialaxis=dict(
+                tickfont=dict(color='white'),
+                range=[0, 1],
+                tickvals=[0, 0.2, 0.4, 0.6, 0.8, 1],
+            ),
+            angularaxis=dict(
+                tickfont=dict(color='white')
+            )
+        ),
+        paper_bgcolor='rgba(0,0,0,0)',  # this makes the background transparent
+        plot_bgcolor='rgba(0,0,0,0)',
+        font_color='white'
+    )
+
+    return fig
+
+
 @app.callback(
     Output('song-info', 'children'),
     Input('timeline-graph', 'clickData')
@@ -305,15 +314,25 @@ def update_song_info(click_data):
     print(click_data)
     if click_data is not None:
         relevant = click_data['points'][0]['text']
-        print(relevant)
+        # print(relevant)
         # point_index = click_data['points'][0]['pointIndex']
         track_info = relevant
+        song, artist = click_data['points'][0]['customdata']
+        for name in dict_df.keys():
+            df = dict_df[name]
+            tmp = df.loc[(df['artist'] == artist) & (
+                df['song_Name'] == song), features]
+            if len(tmp) > 0:
+                break
+        data = tmp.iloc[0].to_list()
+        fig = radarPlot2(data)
 
         return html.Div([
             html.Div(id='song-box', className='neonText',
                      children='Song Information'),
             html.Div(id='selected-song', className='neonText',
-                     children=track_info)
+                     children=track_info),
+            dcc.Graph(figure=fig, id='song-graph')
         ])
     else:
         return html.Div([
@@ -323,35 +342,34 @@ def update_song_info(click_data):
                      children="Please select a Song in\nthe Time Line")
         ])
 
+# --------- song bar plor ---------------------------
 
 # -------- table scores ----------------------------
+
 
 @callback(
     Output(component_id='table-scores', component_property='children'),
     Input('checklist', 'value')
 )
 def update_user_scores(checked):
-    print(checked)
+    # print(checked)
+    df_tmp = pd.DataFrame({'features': features})
+    bbscores = []
 
-    if checked == ['Clara']:    # default
-        df_tmp = pd.DataFrame(
-            {'features': features, 'Clara': features_mean_clara})
-        bbscores = [BBscore]
-
-    else:
-        df_tmp = pd.DataFrame({'features': features})
-        bbscores = []
-
-        for name in checked:
-            df_tmp_full = dict_df[name]
-            pop_tmp = np.round(df_tmp_full['popularity'].mean(), 2)
-            bbscores = bbscores + [pop_tmp]
-            feat_tmp = np.round(df_tmp_full[features].mean().values, 2)
-            df_tmp[name] = feat_tmp
+    for name in checked:
+        df_tmp_full = dict_df[name]
+        pop_tmp = np.round(df_tmp_full['popularity'].mean(), 2)
+        bbscores = bbscores + [pop_tmp]
+        feat_tmp = np.round(df_tmp_full[features].mean().values, 2)
+        df_tmp[name] = feat_tmp
 
     strBB = ""
-    for score in bbscores:
+    for score in bbscores[:-1]:
         strBB = strBB + str(score) + ", "
+    if bbscores != []:
+        strBB += str(bbscores[-1])
+    else:
+        pass
 
     return [
         html.Div(id='bbScore', className='neonText',
