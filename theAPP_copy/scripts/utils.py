@@ -9,21 +9,19 @@ def keep_keys(dictionary, keys):
     return {key: dictionary[key] for key in keys if key in dictionary}
 
 
-# CLIENT_ID = "b8db48d0784f4e2b9ab719adc118e918"
-# CLIENT_SECRET = "0a7feca73df44f1c829f125dbe8a6b91"
-
-
 def get_df(userID, userSecret, username, debug=False):
     print("given:", userID)
-    cache_path = f".cache-{username}"
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=userID,
-                                                   client_secret=userSecret,
-                                                   redirect_uri="http://localhost:3000",
-                                                   cache_path=cache_path,
-                                                   scope="user-read-recently-played"))
-
-    print("current:", sp.current_user()['id'])
-    results = sp.current_user_recently_played(limit=50)
+    cache_path = f"./data/caches/.cache-{username}"
+    try:
+        sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=userID,
+                                                       client_secret=userSecret,
+                                                       redirect_uri="http://localhost:3000",
+                                                       cache_path=cache_path,
+                                                       scope="user-read-recently-played"))
+        print("current:", sp.current_user()['id'])
+        results = sp.current_user_recently_played(limit=50)
+    except Exception as e:
+        print(e)
 
     def get_track_info(row):
         track_ID = row['song_ID']
@@ -76,4 +74,5 @@ def get_df(userID, userSecret, username, debug=False):
 
 
 if __name__ == "__main__":
-    print(get_df(CLIENT_ID, CLIENT_SECRET, debug=True))
+    # print(get_df(CLIENT_ID, CLIENT_SECRET, debug=True))
+    raise ValueError("ClientID and ClientSecret not defined.")
