@@ -31,15 +31,27 @@ LUKAS_CLIENT_SECRET = "829b022bc7cc4559bde70a7dc57a4317"
 CLARA_CLIENT_ID = "58b1a904e6d447f28c57ce10c8b8880c"
 CLARA_CLIENT_SECRET = "6e2d14807777498fba48d13dd557aaeb"
 
+JOHANNES_CLIENT_ID = 'ef739fe8683f4dada353b4260519e694'
+JOHANNES_CLIENT_SECRET = '5076481d53f24b1384fc79754f35a82c'
+
+JOHANNES_CLIENT_ID = 'ef739fe8683f4dada353b4260519e694'
+JOHANNES_CLIENT_SECRET = '5076481d53f24b1384fc79754f35a82c'
+
 # df = get_df(CLARA_CLIENT_ID, CLARA_CLIENT_SECRET)
 
-# df_clara = pd.read_csv("./data/claras_songs.csv")
-# df_lukas = pd.read_csv("./data/claras_songs.csv")
+try:
+    df_clara = get_df(CLARA_CLIENT_ID, CLARA_CLIENT_SECRET, 'clara')
+    df_lukas = get_df(LUKAS_CLIENT_ID, LUKAS_CLIENT_SECRET, 'lukas')
+    df_johannes = get_df(JOHANNES_CLIENT_ID, JOHANNES_CLIENT_SECRET, 'johannes')
+    df_clara.to_csv('./data/claras_songs.csv')
+    df_lukas.to_csv('./data/lukas_songs.csv')
+    df_johannes.to_csv('./data/johannes_songs.csv')
+except:
+    df_clara = pd.read_csv("/home/johannes/Dokumente/tu/info_vis/dataVis/theAPP_copy/data/claras_songs.csv")
+    df_lukas = pd.read_csv("/home/johannes/Dokumente/tu/info_vis/dataVis/theAPP_copy/data/claras_songs.csv")
+    df_johannes = pd.read_csv("/home/johannes/Dokumente/tu/info_vis/dataVis/theAPP_copy/data/claras_songs.csv")
+    
 
-df_clara = get_df(CLARA_CLIENT_ID, CLARA_CLIENT_SECRET, 'clara')
-df_lukas = get_df(LUKAS_CLIENT_ID, LUKAS_CLIENT_SECRET, 'lukas')
-# df_lukas = pd.read_csv("/Users/clarapichler/Desktop/SS 2023/Informationsvisualisierung/dataVis/theAPP_copy/data/claras_songs.csv")
-df_johannes = pd.read_csv("./data/claras_full_frame.csv")
 dict_df = {'Clara': df_clara, 'Lukas': df_lukas, 'Johannes': df_johannes}
 df = df_clara
 
